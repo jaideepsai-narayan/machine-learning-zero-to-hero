@@ -1,11 +1,18 @@
 # Machine Learning Zero to Hero 🚀
 
-[![Course Modules](https.img.shields.io/badge/Modules-9-indigo.svg)](COURSE-MAP.md)
+[![Live Website](https://img.shields.io/badge/Live%20Website-GitHub%20Pages-brightgreen.svg)](https://somsekhar799.github.io/machine-learning-zero-to-hero/)
+[![Course Modules](https://img.shields.io/badge/Modules-9-indigo.svg)](COURSE-MAP.md)
 [![Lessons](https://img.shields.io/badge/Lessons-19%20Complete-emerald.svg)](index.html)
 [![Stack](https://img.shields.io/badge/Tech-HTML5%20%7C%20CSS3%20%7C%20JS%20%7C%20PyTorch-orange.svg)](#tech-stack)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An interactive, visual, and math-rigorous web-based course taking learners from **absolute zero** to **state-of-the-art Deep Learning** (Transformers, Diffusion Models, GANs, and PyTorch).
+
+> 🌐 **Live Interactive Website:**  
+> Access the live interactive course and 2D/3D visualizers directly in your browser:  
+> 👉 **[https://somsekhar799.github.io/machine-learning-zero-to-hero/](https://somsekhar799.github.io/machine-learning-zero-to-hero/)**
+
+---
 
 Every concept is presented through a structured 4-part framework:
 1. **WHY**: Real-world motivation and industrial applications.
@@ -51,16 +58,21 @@ Every concept is presented through a structured 4-part framework:
 
 ---
 
-## ⚡ Quick Start & Local Development
+## ⚡ How to View & Run the Course
 
-### Option 1: Open in Browser Directly
-Simply double-click [`index.html`](index.html) or open it in any browser.
+### Option 1: Live Web Preview (GitHub Pages — Instant)
+Simply open the live website hosted on GitHub Pages:  
+👉 **[https://somsekhar799.github.io/machine-learning-zero-to-hero/](https://somsekhar799.github.io/machine-learning-zero-to-hero/)**
 
-### Option 2: Run a Local Dev Server
+### Option 2: Instant HTML Preview Tool (No Setup Needed)
+To preview any specific HTML file directly from GitHub without cloning:  
+👉 **[HTML Preview: index.html](https://htmlpreview.github.io/?https://github.com/somsekhar799/machine-learning-zero-to-hero/blob/main/index.html)**
+
+### Option 3: Run Locally (Offline)
 ```bash
 # Clone the repository
-git clone https://github.com/somsekhar799/ml-zero-to-hero.git
-cd ml-zero-to-hero
+git clone https://github.com/somsekhar799/machine-learning-zero-to-hero.git
+cd machine-learning-zero-to-hero
 
 # Start a simple HTTP server using Python
 python3 -m http.server 8080
