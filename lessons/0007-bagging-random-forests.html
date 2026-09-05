@@ -90,11 +90,10 @@
     <div class="callout-title">🎁 Out-of-Bag (OOB) Error & Feature Importance</div>
     <ul>
      <li><strong>Out-of-Bag (OOB) Free Validation:</strong> When drawing bootstrap samples with replacement, mathematically $\approx 36.8\%$ of data points are left out of each tree:</li>
-     \[ \lim_{N \to \infty} \left( 1 - \frac{1}{N} 
-ight)^N = \frac{1}{e} \approx 0.368 \]
+     \[ \lim_{N \to \infty} \left( 1 - \frac{1}{N} \right)^N = \frac{1}{e} \approx 0.368 \]
      These left-out "OOB samples" act as a built-in validation set! You get free model evaluation without holding out test data.
      <li><strong>Feature Importance (MDI):</strong> Random Forests calculate feature importance by tracking how much each feature reduces Gini Impurity across all trees in the forest.</li>
-     <li><strong>Random Feature Subsampling ( = \sqrt{P}$):</strong> If one dominant feature exists, every tree would split on it first! Sampling only $\sqrt{P}$ features per split forces trees to look at different attributes, decorrelating the ensemble.</li>
+     <li><strong>Random Feature Subsampling ($m = \sqrt{P}$):</strong> If one dominant feature exists, every tree would split on it first! Sampling only $\sqrt{P}$ features per split forces trees to look at different attributes, decorrelating the ensemble.</li>
     </ul>
    </div>
 

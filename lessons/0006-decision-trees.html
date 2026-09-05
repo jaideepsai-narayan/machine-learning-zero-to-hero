@@ -97,7 +97,7 @@
        <li><code>min_samples_leaf</code>: Minimum samples required inside a terminal leaf node.</li>
       </ul>
      </li>
-     <li><strong>Gini Impurity ($) vs. Entropy ($):</strong>
+     <li><strong>Gini Impurity ($G$) vs. Entropy ($H$):</strong>
       \[ G(S) = 1 - \sum_{i=1}^{C} p_i^2, \quad H(S) = -\sum_{i=1}^{C} p_i \log_2(p_i) \]
       Gini is faster to compute (no logarithms) and is the default in Scikit-Learn.
      </li>
@@ -147,7 +147,7 @@
       <tr style="border-bottom: 1px solid var(--border-color);">
        <td style="padding: 10px;"><strong>Feature Scaling Requirement</strong></td>
        <td style="padding: 10px; color: var(--accent-teal);">None (Monotonic invariant)</td>
-       <td style="padding: 10px; color: var(--accent-pink);">Strictly Required (569Xscore / Normalization)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Strictly Required (Z-score / Normalization)</td>
       </tr>
       <tr style="border-bottom: 1px solid var(--border-color);">
        <td style="padding: 10px;"><strong>Non-Linear Relationships</strong></td>

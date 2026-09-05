@@ -86,10 +86,8 @@
    <div class="callout red" style="margin-top: 1.5rem;">
     <div class="callout-title">📐 Spatial Dimension Math, Data Augmentation & Transfer Learning</div>
     <ul>
-     <li><strong>Convolution Output Dimension Formula:</strong> Given an input of width $, filter kernel size $, padding $, and stride $, the output feature map dimension is:</li>
-     \[ O = \left\lfloor \frac{W - F + 2P}{S} 
-ight
-floor + 1 \]
+      <li><strong>Convolution Output Dimension Formula:</strong> Given an input of width $W$, filter kernel size $F$, padding $P$, and stride $S$, the output feature map dimension is:</li>
+      \[ O = \left\lfloor \frac{W - F + 2P}{S} \right\rfloor + 1 \]
      <li><strong>Data Augmentation:</strong> Prevents spatial memorization by applying random transformations during training (random crops, horizontal flips, 15° rotations, brightness shifts).</li>
      <li><strong>Transfer Learning & Fine-Tuning:</strong> Instead of training a 25-million parameter CNN from scratch on a small dataset, developers load pre-trained ImageNet weights (e.g., ResNet, ConvNeXt), freeze the feature extractor backbone, and fine-tune only the final output layer!</li>
     </ul>
@@ -143,7 +141,7 @@ floor + 1 \]
      <tbody>
       <tr style="border-bottom: 1px solid var(--border-color);">
        <td style="padding: 10px;"><strong>Flat MLP (Fully Connected)</strong></td>
-       <td style="padding: 10px; color: var(--accent-pink);">Massive ((W \text{imes} H)$ weights)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Massive ($W \times H$ weights)</td>
        <td style="padding: 10px; color: var(--accent-pink);">Zero (Breaks on pixel shifts)</td>
        <td style="padding: 10px;">Large</td>
        <td style="padding: 10px;">Small tabular vectors only (Never for images)</td>

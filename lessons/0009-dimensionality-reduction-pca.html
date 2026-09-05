@@ -89,10 +89,10 @@
    <div class="callout red" style="margin-top: 1.5rem;">
     <div class="callout-title">⚠️ Feature Scaling Requirement & Explained Variance</div>
     <ul>
-     <li><strong>Mandatory Feature Standardization (569XScore):</strong> PCA looks for axes of maximum variance. If feature $ is measured in dollars (\to \text{ to } 1,000,000$) and feature $ in meters (\to \text{ to } 2$), PCA will completely ignore feature 0 You MUST scale features to $\mu=0, \sigma=1$ before running PCA.</li>
-     <li><strong>Explained Variance Ratio:</strong> Each eigenvector $\mathbf{v}_i$ has an eigenvalue $\lambda_i$ measuring variance along that axis. The fraction of total information preserved by $ components is:</li>
+     <li><strong>Mandatory Feature Standardization (Z-Score):</strong> PCA looks for axes of maximum variance. If feature $x_1$ is measured in dollars ($0 \text{ to } 1,000,000$) and feature $x_2$ in meters ($0 \text{ to } 2$), PCA will completely ignore feature $x_2$. You MUST scale features to $\mu=0, \sigma=1$ before running PCA.</li>
+     <li><strong>Explained Variance Ratio:</strong> Each eigenvector $\mathbf{v}_i$ has an eigenvalue $\lambda_i$ measuring variance along that axis. The fraction of total information preserved by $k$ components is:</li>
      \[ \text{Explained Variance Ratio} = \frac{\sum_{i=1}^{k} \lambda_i}{\sum_{j=1}^{P} \lambda_j} \]
-     Targeting \%$ cumulative explained variance is standard practice.
+     Targeting $95\%$ cumulative explained variance is standard practice.</li>
      <li><strong>Linear PCA vs. Non-Linear Embeddings (t-SNE / UMAP):</strong> PCA only finds straight linear projection axes. For non-linear Swiss-roll manifold data, modern AI uses t-SNE or UMAP to preserve local cluster topology.</li>
     </ul>
    </div>

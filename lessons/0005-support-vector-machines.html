@@ -76,18 +76,18 @@
    \[ K(x, x') = \exp\left(-\gamma \|x - x'\|^2\right) \]
   
    <div class="callout red" style="margin-top: 1.5rem;">
-    <div class="callout-title">🎛️ Key Hyperparameters: Penalty $ & Kernel Gamma $\gamma$</div>
+    <div class="callout-title">🎛️ Key Hyperparameters: Penalty Parameter $C$ & Kernel Gamma $\gamma$</div>
     <ul>
-     <li><strong>Soft Margin Penalty ($):</strong> Controls trade-off between margin width and classification errors:
+     <li><strong>Soft Margin Penalty ($C$):</strong> Controls trade-off between margin width and classification errors:
       <ul>
-       <li><strong>High $ (Hard Margin):</strong> Penalizes misclassifications severely. Narrow margin, prone to <em>overfitting</em> noise.</li>
-       <li><strong>Low $ (Soft Margin):</strong> Allows some points inside margin. Wider margin, higher generalization, risk of <em>underfitting</em>.</li>
+       <li><strong>High $C$ (Hard Margin):</strong> Penalizes misclassifications severely. Narrow margin, prone to <em>overfitting</em> noise.</li>
+       <li><strong>Low $C$ (Soft Margin):</strong> Allows some points inside margin. Wider margin, higher generalization, risk of <em>underfitting</em>.</li>
       </ul>
      </li>
      <li><strong>RBF Kernel Width ($\gamma$):</strong> Defines reach of a single training point:
       <ul>
-       <li><strong>High $\gamma$:</strong> Points have tight local influence, creating complex, complex decision islands (high variance).</li>
-       <li><strong>Low $\gamma$:</strong> Points have smooth global influence, creating simple boundaries (high bias).</li>
+       <li><strong>High $\gamma$:</strong> Points have tight local influence, creating complex decision islands (high variance / overfitting).</li>
+       <li><strong>Low $\gamma$:</strong> Points have smooth global influence, creating simple boundaries (high bias / underfitting).</li>
       </ul>
      </li>
      <li><strong>Support Vectors:</strong> Only points lying on or violating the margin boundary (where $\alpha_i > 0$) determine the decision boundary! Non-support vector points can be completely removed without changing the line.</li>

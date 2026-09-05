@@ -89,17 +89,16 @@
    </div>
   
    <div class="callout red" style="margin-top: 1.5rem;">
-    <div class="callout-title">📏 Choosing $: Elbow Method & Silhouette Score</div>
-    <ul>
-     <li><strong>The Elbow Method (WCSS):</strong> Plot Within-Cluster Sum of Squares (Inertia) against $. Pick the "elbow point" where adding more clusters yields diminishing returns.</li>
-     <li><strong>Silhouette Coefficient ($):</strong> Measures how well-separated clusters are on a scale of 569X1$ to 0$:</li>
-     \[ s(i) = \frac{b(i) - a(i)}{\max\left(a(i), b(i)
-ight)} \]
-     where (i)$ is mean intra-cluster distance and (i)$ is nearest-cluster distance.
-     <li><strong>K-Means++ Initialization:</strong> Random initial centroids can lead to terrible local minima! K-Means++ chooses initial centroids weighted by squared distance ((x)^2$) from existing centroids, guaranteeing optimal convergence.</li>
-     <li><strong>DBSCAN Parameters:</strong> $\epsilon$ (neighborhood distance) and <code>min_samples</code>. Points with $< \text{min\_samples}$ in their $\epsilon569Xradius are flagged as <em>Noise (Outliers)</em>.</li>
-    </ul>
-   </div>
+     <div class="callout-title">📏 Choosing $K$: Elbow Method &amp; Silhouette Score</div>
+     <ul>
+      <li><strong>The Elbow Method (WCSS):</strong> Plot Within-Cluster Sum of Squares (Inertia) against $K$. Pick the "elbow point" where adding more clusters yields diminishing returns.</li>
+      <li><strong>Silhouette Coefficient ($s(i)$):</strong> Measures how well-separated clusters are on a scale of $-1$ to $+1$:</li>
+      \[ s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))} \]
+      where $a(i)$ is mean intra-cluster distance and $b(i)$ is mean nearest-cluster distance.
+      <li><strong>K-Means++ Initialization:</strong> Random initial centroids can lead to terrible local minima! K-Means++ chooses initial centroids weighted by squared distance ($D(x)^2$) from existing centroids, guaranteeing optimal convergence.</li>
+      <li><strong>DBSCAN Parameters:</strong> $\epsilon$ (neighborhood distance) and <code>min_samples</code>. Points with $< \text{min\_samples}$ neighbors in their $\epsilon$-radius are flagged as <em>Noise (Outliers)</em>.</li>
+     </ul>
+    </div>
 
   </section>
 
