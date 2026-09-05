@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reference: The Grand Evolution of Machine Learning Algorithms</title>
+  <title>Reference: Grand Machine Learning Evolution & Master Cheat Sheet</title>
   <link rel="stylesheet" href="../assets/style.css">
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script>
@@ -13,83 +13,438 @@
         processHtmlClass: 'tex2jax_process'
       },
       tex: {
-        inlineMath: [['$', '$'], ['\(', '\)']]
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
       }
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    .matrix-container {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      min-width: 1000px;
+    }
+    .matrix-table th {
+      background-color: var(--primary-color, #1e293b);
+      color: #ffffff;
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .matrix-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
+      vertical-align: top;
+    }
+    .matrix-table tr:nth-child(even) {
+      background-color: rgba(0,0,0,0.02);
+    }
+    .tag-sup { background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .tag-unsup { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .tag-dl { background: #fce7f3; color: #9d174d; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .tag-gen { background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+  </style>
 </head>
 <body>
   <header>
-    <h1>The Grand Evolution of Machine Learning Algorithms</h1>
+    <span class="badge">Master Reference • Complete Curriculum</span>
+    <h1>The Grand Evolution of Machine Learning Algorithms ⚔️</h1>
     <div class="meta">
-      <span>Topic: Algorithm Evolution, Drawbacks & Transitions</span>
-      <span><a href="../lessons/0008-boosting-adaboost-xgboost.html">&larr; Lesson 0008</a></span>
+      <span>Topic: All 19 Modules • Algorithm Evolution, Drawbacks & Math Matrix</span>
+      <span><a href="../index.html">&larr; Main Curriculum Index</a></span>
     </div>
   </header>
 
   <main>
     <p>
-      Every major algorithm in machine learning was invented to fix a specific flaw in the algorithm before it. Below is the complete evolutionary timeline from simple lines to gradient boosted trees:
+      Every major algorithm in machine learning was invented to fix a specific flaw in the model before it. Below is the <strong>Master Comparison Matrix</strong> followed by the <strong>Complete 19-Lesson Evolutionary Timeline</strong>.
     </p>
 
-    <div class="interactive-card">
-      <h2>1. Linear Regression</h2>
-      <p><strong>Goal & Formula:</strong> Fit a continuous straight line $y = m \cdot x + b$ by minimizing Mean Squared Error (MSE).</p>
-      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
-        <strong>⚠️ Major Drawback:</strong> Outputs unbounded continuous numbers ($-\infty, +\infty$). It cannot handle binary (Yes/No) classification or predict probabilities.
-      </div>
-      <div class="callout green">
-        <strong>💡 Why Move to Next Algorithm?</strong> We need a function to squish continuous outputs into probabilities between 0.0 and 1.0 $\implies$ <strong>Logistic Regression</strong>.
-      </div>
-    </div>
+    <!-- SECTION 0: MASTER ALGORITHM MATRIX -->
+    <section>
+      <h2>📊 Master Algorithm Comparison Matrix</h2>
+      <p>Quick side-by-side reference of mathematical objectives, complexities, and primary hyperparameters across all 19 topics:</p>
 
-    <div class="interactive-card">
-      <h2>2. Logistic Regression</h2>
-      <p><strong>Goal & Formula:</strong> Pass linear output through the Sigmoid S-curve: $\hat{p} = \frac{1}{1 + e^{-(mx+b)}}$, minimizing Log Loss.</p>
-      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
-        <strong>⚠️ Major Drawback:</strong> Can only draw a single <em>linear (flat) decision boundary</em> in feature space. Completely fails on non-linearly separable data (e.g., XOR patterns or complex nested features) without manual feature engineering.
+      <div class="matrix-container">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Module / Algorithm</th>
+              <th>Paradigm</th>
+              <th>Core Mathematical Objective</th>
+              <th>Time Complexity</th>
+              <th>Key Hyperparameters</th>
+              <th>Primary Use Case & Strength</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>01. Linear Regression</strong></td>
+              <td><span class="tag-sup">Supervised</span></td>
+              <td>$\min_{w,b} \frac{1}{N}\sum (y_i - (w^T x_i + b))^2$</td>
+              <td>Train: $O(P^3 + P^2 N)$<br>Infer: $O(P)$</td>
+              <td>Fit intercept, Regularization $\lambda$</td>
+              <td>Continuous numerical prediction with linear features. Extremely fast & interpretable.</td>
+            </tr>
+            <tr>
+              <td><strong>02. Gradient Descent</strong></td>
+              <td><span class="tag-sup">Optimization</span></td>
+              <td>$w^{(t+1)} = w^{(t)} - \alpha \nabla_w L(w)$</td>
+              <td>Per step: $O(B \cdot P)$</td>
+              <td>Learning rate $\alpha$, Batch size $B$, Momentum $\beta$</td>
+              <td>Universal optimizer for non-closed-form convex and non-convex loss functions.</td>
+            </tr>
+            <tr>
+              <td><strong>03. Logistic Regression</strong></td>
+              <td><span class="tag-sup">Supervised</span></td>
+              <td>$\min -\frac{1}{N}\sum [y \log \hat{p} + (1-y)\log(1-\hat{p})]$</td>
+              <td>Train: $O(N \cdot P)$<br>Infer: $O(P)$</td>
+              <td>Regularization $C$ (L1/L2), Solver type</td>
+              <td>Binary probability estimation. Baseline for classification & risk scoring.</td>
+            </tr>
+            <tr>
+              <td><strong>04. Support Vector Machines</strong></td>
+              <td><span class="tag-sup">Supervised</span></td>
+              <td>$\min \frac{1}{2}\|w\|^2 + C \sum \xi_i$</td>
+              <td>Train: $O(N^2 \cdot P)$ to $O(N^3)$<br>Infer: $O(N_{sv} \cdot P)$</td>
+              <td>Penalty $C$, Kernel ($\text{RBF}, \text{Poly}$), Gamma $\gamma$</td>
+              <td>High-dimensional sparse text & bio-data. Finds maximum margin boundary.</td>
+            </tr>
+            <tr>
+              <td><strong>05. Decision Trees</strong></td>
+              <td><span class="tag-sup">Supervised</span></td>
+              <td>$\max \text{Gain} = \text{Impurity}_{\text{parent}} - \sum \frac{N_j}{N}\text{Impurity}_j$</td>
+              <td>Train: $O(P \cdot N \log N)$<br>Infer: $O(\text{depth})$</td>
+              <td><code>max_depth</code>, <code>min_samples_split</code>, Gini/Entropy</td>
+              <td>Non-linear tabular data. Requires zero scaling, automatically handles feature interactions.</td>
+            </tr>
+            <tr>
+              <td><strong>06. Random Forests (Bagging)</strong></td>
+              <td><span class="tag-sup">Ensemble</span></td>
+              <td>$\hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(x)$ (Bootstrapped rows + $\sqrt{P}$)</td>
+              <td>Train: $O(B \cdot P \cdot N \log N)$<br>Infer: $O(B \cdot \text{depth})$</td>
+              <td><code>n_estimators</code>, <code>max_features</code> ($\sqrt{P}$)</td>
+              <td>Reduces high variance of single trees. Strong default tabular performance out of the box.</td>
+            </tr>
+            <tr>
+              <td><strong>07. Boosting (XGBoost/AdaBoost)</strong></td>
+              <td><span class="tag-sup">Ensemble</span></td>
+              <td>$F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)$ (Residual fitting)</td>
+              <td>Train: $O(M \cdot P \cdot N \log N)$<br>Infer: $O(M \cdot \text{depth})$</td>
+              <td>Learning rate $\eta$, <code>n_estimators</code>, Subsample ratio</td>
+              <td>State-of-the-art benchmark winner on tabular competition datasets.</td>
+            </tr>
+            <tr>
+              <td><strong>08. Dimensionality Reduction (PCA)</strong></td>
+              <td><span class="tag-unsup">Unsupervised</span></td>
+              <td>$\max_{\mathbf{v}} \mathbf{v}^T \Sigma \mathbf{v} \quad \text{s.t. } \|\mathbf{v}\|=1$</td>
+              <td>Train: $O(P^3 + P^2 N)$<br>Infer: $O(P \cdot k)$</td>
+              <td>Number of components $k$, Explained variance ratio</td>
+              <td>Linear feature compression, noise reduction, 2D/3D visualization of dense data.</td>
+            </tr>
+            <tr>
+              <td><strong>09. Unsupervised Clustering</strong></td>
+              <td><span class="tag-unsup">Unsupervised</span></td>
+              <td>K-Means: $\min \sum_{k=1}^K \sum_{x \in C_k} \|x - \mu_k\|^2$</td>
+              <td>K-Means: $O(I \cdot K \cdot N \cdot P)$<br>DBSCAN: $O(N \log N)$</td>
+              <td>K-Means $K$; DBSCAN radius $\epsilon$, <code>min_samples</code></td>
+              <td>Customer segmentation, anomaly detection, discovering hidden natural patterns.</td>
+            </tr>
+            <tr>
+              <td><strong>10. Backpropagation & MLPs</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>$\delta^{[l]} = \left((W^{[l+1]})^T \delta^{[l+1]}\right) \odot \sigma'(z^{[l]})$</td>
+              <td>Per epoch: $O(N \cdot \sum L_l L_{l-1})$</td>
+              <td>Architecture, Activation (ReLU/Sigmoid), Learning rate</td>
+              <td>Universal function approximation for complex non-linear multi-layer representations.</td>
+            </tr>
+            <tr>
+              <td><strong>11. Convolutional Neural Networks</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>$O = \left\lfloor \frac{W - F + 2P}{S} \right\rfloor + 1$</td>
+              <td>Forward: $O(N \cdot C_{in} \cdot C_{out} \cdot K_h K_w \cdot H O)$</td>
+              <td>Kernel size $F$, Stride $S$, Padding $P$, Channels</td>
+              <td>Computer vision & grid data. Spatial weight sharing and shift invariance.</td>
+            </tr>
+            <tr>
+              <td><strong>12. Object Detection (YOLO)</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>Loss $= L_{\text{box}} + L_{\text{cls}} + L_{\text{obj}}$ with $\text{IoU}=\frac{|A \cap B|}{|A \cup B|}$</td>
+              <td>Single pass grid cell inference</td>
+              <td>Anchor box scales, IoU threshold, NMS confidence</td>
+              <td>Real-time bounding box localization and multi-object classification in images/video.</td>
+            </tr>
+            <tr>
+              <td><strong>13. Image Segmentation (U-Net)</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>$\text{Dice Loss} = 1 - \frac{2|A \cap B|}{|A| + |B|}$</td>
+              <td>Encoder-Decoder skip connection pass</td>
+              <td>Skip connections, Bottleneck channels, Loss weights</td>
+              <td>Pixel-level mask classification (medical imaging, autonomous driving road maps).</td>
+            </tr>
+            <tr>
+              <td><strong>14. Evaluation & Regularization</strong></td>
+              <td><span class="tag-sup">Evaluation</span></td>
+              <td>L1 Lasso: $+\lambda \|w\|_1$; L2 Ridge: $+\lambda \|w\|_2^2$</td>
+              <td>Evaluation: $O(N)$</td>
+              <td>Penalty $\lambda$, Dropout rate $p$, CV folds $k$</td>
+              <td>Preventing overfitting/underfitting, feature selection, and un-biased metric scoring.</td>
+            </tr>
+            <tr>
+              <td><strong>15. Text Embeddings & NLP</strong></td>
+              <td><span class="tag-dl">NLP</span></td>
+              <td>$\text{TF-IDF} = \text{TF} \times \log\left(\frac{|D|}{|\{d: t \in d\}|}\right)$</td>
+              <td>Embedding lookup: $O(1)$</td>
+              <td>Vector dimension $d$, Window size, Min count</td>
+              <td>Converting unstructured text into semantic dense vector space representations.</td>
+            </tr>
+            <tr>
+              <td><strong>16. Sequence Models (LSTM/GRU)</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>$h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b)$</td>
+              <td>Per sequence: $O(T \cdot d^2)$</td>
+              <td>Hidden size $d$, Num layers, Dropout</td>
+              <td>Processing sequential data (time-series, audio, text) with gated memory cells.</td>
+            </tr>
+            <tr>
+              <td><strong>17. Transformers & Attention</strong></td>
+              <td><span class="tag-dl">Deep Learning</span></td>
+              <td>$\text{Attention}(Q, K, V) = \text{Softmax}\left( \frac{Q K^T}{\sqrt{d_k}} \right) V$</td>
+              <td>Per layer: $O(T^2 \cdot d)$</td>
+              <td>Number of heads $h$, Model dim $d_{model}$, Context $T$</td>
+              <td>Parallel self-attention over long-range dependencies powering modern LLMs & Foundation models.</td>
+            </tr>
+            <tr>
+              <td><strong>18. Generative AI (GANs/Diffusion)</strong></td>
+              <td><span class="tag-gen">Generative AI</span></td>
+              <td>$\min_G \max_D V(D,G)$ / $L_{\text{simple}} = \mathbb{E}\left[\|\epsilon - \epsilon_\theta(x_t, t)\|^2\right]$</td>
+              <td>Diffusion: $T$ reverse denoising steps</td>
+              <td>Timesteps $T$, Noise schedule $\beta_t$, Guidance $w$</td>
+              <td>Creating ultra-realistic synthetic images, text-to-image art, and data generation.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="callout green">
-        <strong>💡 Why Move to Next Algorithm?</strong> We need non-linear decision boundaries that automatically partition feature space without manual math transformations $\implies$ <strong>Decision Trees</strong>.
-      </div>
-    </div>
+    </section>
 
-    <div class="interactive-card">
-      <h2>3. Decision Trees</h2>
-      <p><strong>Goal & Formula:</strong> Recursively split data using feature threshold questions that maximize Information Gain (or minimize Gini Impurity $G = 1 - \sum p_i^2$).</p>
-      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
-        <strong>⚠️ Major Drawback:</strong> High Variance & Overfitting! A deep decision tree memorizes noise in the training data, resulting in poor generalization on unseen test data.
-      </div>
-      <div class="callout green">
-        <strong>💡 Why Move to Next Algorithm?</strong> We need to reduce high variance by averaging hundreds of independent trees trained on random subsets $\implies$ <strong>Bagging & Random Forests</strong>.
-      </div>
-    </div>
+    <!-- SECTION 1-19: EVOLUTIONARY TIMELINE CARDS -->
+    <section style="margin-top: 2rem;">
+      <h2>🚀 The Complete 19-Lesson Evolutionary Timeline</h2>
 
-    <div class="interactive-card">
-      <h2>4. Bagging & Random Forests</h2>
-      <p><strong>Goal & Formula:</strong> Train $B$ independent decision trees in parallel using bootstrapped row samples and random feature subsets ($\sqrt{M}$). Aggregate predictions via majority vote or averaging.</p>
-      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
-        <strong>⚠️ Major Drawback:</strong>
-        1. Trees are built independently, so hard-to-predict samples get ignored if the majority vote gets them wrong.
-        2. High Bias if the base trees are too shallow.
+      <!-- 1. Linear Regression -->
+      <div class="interactive-card">
+        <h3>1. Linear Regression <a href="../lessons/0002-linear-regression-loss.html" style="font-size:0.85rem;">[Lesson 0002]</a></h3>
+        <p><strong>Goal & Formula:</strong> Fit a continuous line $y = w \cdot x + b$ minimizing Mean Squared Error (MSE): $\frac{1}{N}\sum (y_i - \hat{y}_i)^2$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Outputs unbounded continuous numbers ($-\infty, +\infty$). It cannot handle binary (Yes/No) classification or estimate bounded probabilities.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need a mathematical squishing function to map predictions between $0.0$ and $1.0$ $\implies$ <strong>Logistic Regression</strong>.
+        </div>
       </div>
-      <div class="callout green">
-        <strong>💡 Why Move to Next Algorithm?</strong> Instead of building trees independently in parallel, build trees <em>sequentially</em>, where each new tree specifically fixes the residual mistakes of all prior trees $\implies$ <strong>Boosting (AdaBoost / XGBoost)</strong>.
-      </div>
-    </div>
 
-    <div class="interactive-card">
-      <h2>5. Boosting (AdaBoost, Gradient Boosting & XGBoost)</h2>
-      <p><strong>Goal & Formula:</strong> Build sequential ensembles fitting residuals: $F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)$.</p>
-      <div class="callout green">
-        <strong>🏆 Why It Dominates:</strong> Combines weak learners into an optimal strong learner, achieving state-of-the-art performance on tabular data!
+      <!-- 2. Gradient Descent -->
+      <div class="interactive-card">
+        <h3>2. Optimization: Gradient Descent & Adam <a href="../lessons/0003-gradient-descent.html" style="font-size:0.85rem;">[Lesson 0003]</a></h3>
+        <p><strong>Goal & Formula:</strong> Iteratively update weights opposite the gradient: $w \leftarrow w - \alpha \nabla_w L$. Closed-form inversion $(X^T X)^{-1}$ costs $O(P^3)$ and fails on huge data!</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Vanilla batch gradient descent is slow on massive datasets and gets stuck in local minima or saddle points.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> Use mini-batch sampling and adaptive momentum (Adam) to speed up training across non-convex loss surfaces.
+        </div>
       </div>
-    </div>
+
+      <!-- 3. Logistic Regression -->
+      <div class="interactive-card">
+        <h3>3. Logistic Regression <a href="../lessons/0004-logistic-regression.html" style="font-size:0.85rem;">[Lesson 0004]</a></h3>
+        <p><strong>Goal & Formula:</strong> Pass linear outputs through the Sigmoid S-curve: $\hat{p} = \frac{1}{1 + e^{-(w^T x + b)}}$, minimizing Binary Cross-Entropy Log Loss.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Can only draw a <em>linear (flat) decision boundary</em>. Completely fails on non-linearly separable data (e.g., XOR patterns) without manual feature engineering.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need max-margin boundaries and kernel transformations $\implies$ <strong>SVMs</strong>, or automated decision trees $\implies$ <strong>Decision Trees</strong>.
+        </div>
+      </div>
+
+      <!-- 4. Support Vector Machines -->
+      <div class="interactive-card">
+        <h3>4. Support Vector Machines (SVMs) <a href="../lessons/0005-support-vector-machines.html" style="font-size:0.85rem;">[Lesson 0005]</a></h3>
+        <p><strong>Goal & Formula:</strong> Maximize street margin $\frac{2}{\|w\|}$ with Soft Margin Penalty $C$ and RBF Kernel $K(x, x') = \exp(-\gamma \|x - x'\|^2)$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Training complexity is $O(N^2)$ to $O(N^3)$. Computationally unfeasible for datasets exceeding hundreds of thousands of samples.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need intuitive, non-parametric split models that scale better on large tabular datasets $\implies$ <strong>Decision Trees</strong>.
+        </div>
+      </div>
+
+      <!-- 5. Decision Trees -->
+      <div class="interactive-card">
+        <h3>5. Decision Trees <a href="../lessons/0006-decision-trees.html" style="font-size:0.85rem;">[Lesson 0006]</a></h3>
+        <p><strong>Goal & Formula:</strong> Recursively split data using feature threshold questions maximizing Information Gain (minimizing Gini Impurity $G = 1 - \sum p_i^2$).</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> High Variance & Overfitting! A deep decision tree memorizes noise in training data, resulting in poor generalization on test data.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> Reduce high variance by averaging hundreds of independent trees trained on random row/feature subsets $\implies$ <strong>Bagging & Random Forests</strong>.
+        </div>
+      </div>
+
+      <!-- 6. Bagging & Random Forests -->
+      <div class="interactive-card">
+        <h3>6. Bagging & Random Forests <a href="../lessons/0007-bagging-random-forests.html" style="font-size:0.85rem;">[Lesson 0007]</a></h3>
+        <p><strong>Goal & Formula:</strong> Train $B$ independent decision trees in parallel using bootstrapped samples and random feature subsets ($\sqrt{P}$). Aggregate via majority vote.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Trees are built independently in parallel, so hard-to-predict samples get ignored if the majority vote gets them wrong.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> Build trees <em>sequentially</em>, where each new tree specifically fits the residual errors of prior trees $\implies$ <strong>Boosting (XGBoost)</strong>.
+        </div>
+      </div>
+
+      <!-- 7. Boosting -->
+      <div class="interactive-card">
+        <h3>7. Boosting (AdaBoost, Gradient Boosting & XGBoost) <a href="../lessons/0008-boosting-adaboost-xgboost.html" style="font-size:0.85rem;">[Lesson 0008]</a></h3>
+        <p><strong>Goal & Formula:</strong> Fit sequential tree ensembles on negative loss gradients: $F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)$.</p>
+        <div class="callout green">
+          <strong>🏆 Tabular Dominance:</strong> Achieves state-of-the-art competition benchmarks on tabular datasets! But what about unlabelled data or high-dimensional compression?
+        </div>
+      </div>
+
+      <!-- 8. Dimensionality Reduction -->
+      <div class="interactive-card">
+        <h3>8. Dimensionality Reduction (PCA, t-SNE, UMAP) <a href="../lessons/0009-dimensionality-reduction-pca.html" style="font-size:0.85rem;">[Lesson 0009]</a></h3>
+        <p><strong>Goal & Formula:</strong> Project high-dimensional features onto lower orthogonal axes maximizing variance: $\text{Ratio} = \frac{\sum_{i=1}^k \lambda_i}{\sum_{j=1}^P \lambda_j}$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Linear PCA cannot unroll non-linear manifolds (e.g. Swiss-roll). t-SNE/UMAP fix non-linear projections but cannot predict on new unseen test points easily.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need algorithms that group data without predefined coordinates or target labels $\implies$ <strong>Unsupervised Clustering</strong>.
+        </div>
+      </div>
+
+      <!-- 9. Unsupervised Clustering -->
+      <div class="interactive-card">
+        <h3>9. Unsupervised Clustering (K-Means, Hierarchical & DBSCAN) <a href="../lessons/0010-unsupervised-clustering.html" style="font-size:0.85rem;">[Lesson 0010]</a></h3>
+        <p><strong>Goal & Formula:</strong> Group unlabelled data by distance or density. Silhouette score $s(i) = \frac{b(i)-a(i)}{\max(a(i),b(i))}$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> K-Means requires pre-specifying $K$ and assumes spherical clusters. DBSCAN struggles with varying density clusters.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need hierarchical feature representation learning for unstructured perceptual inputs (images, audio) $\implies$ <strong>Neural Networks</strong>.
+        </div>
+      </div>
+
+      <!-- 10. Backpropagation -->
+      <div class="interactive-card">
+        <h3>10. Neural Networks & Backpropagation <a href="../lessons/0011-backpropagation.html" style="font-size:0.85rem;">[Lesson 0011]</a></h3>
+        <p><strong>Goal & Formula:</strong> Train multi-layer perceptrons via chain rule calculus: $\delta^{[l]} = \left((W^{[l+1]})^T \delta^{[l+1]}\right) \odot \sigma'(z^{[l]})$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Flattening 2D/3D images into 1D vectors destroys spatial structure and leads to parameter explosion (millions of weights for small images).
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> Preserved 2D spatial locality with small sliding filter kernels and weight sharing $\implies$ <strong>Convolutional Neural Networks (CNNs)</strong>.
+        </div>
+      </div>
+
+      <!-- 11. CNNs -->
+      <div class="interactive-card">
+        <h3>11. Convolutional Neural Networks (CNNs) <a href="../lessons/0012-cnn-image-classification.html" style="font-size:0.85rem;">[Lesson 0012]</a></h3>
+        <p><strong>Goal & Formula:</strong> Apply spatial sliding filters $(I * K)$ with dimension $O = \left\lfloor \frac{W - F + 2P}{S} \right\rfloor + 1$ and ResNet skip connections $y = F(x) + x$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Standard classification CNNs only output a single global label per image, ignoring where objects are located.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need localization bounding boxes and multi-object spatial coordinates $\implies$ <strong>Object Detection (YOLO)</strong>.
+        </div>
+      </div>
+
+      <!-- 12. Object Detection -->
+      <div class="interactive-card">
+        <h3>12. Object Detection (YOLO & Faster R-CNN) <a href="../lessons/0013-object-detection.html" style="font-size:0.85rem;">[Lesson 0013]</a></h3>
+        <p><strong>Goal & Formula:</strong> Predict bounding boxes $(x,y,w,h)$ and class probabilities simultaneously, evaluated via Intersection over Union $\text{IoU} = \frac{|A \cap B|}{|A \cup B|}$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Bounding boxes are rectangular boxes. They cannot identify exact pixel boundaries or organic shapes (e.g., tumor boundaries, road surfaces).
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need pixel-level mask classification $\implies$ <strong>Image Segmentation (U-Net)</strong>.
+        </div>
+      </div>
+
+      <!-- 13. Image Segmentation -->
+      <div class="interactive-card">
+        <h3>13. Image Segmentation (U-Net & Mask R-CNN) <a href="../lessons/0014-image-segmentation.html" style="font-size:0.85rem;">[Lesson 0014]</a></h3>
+        <p><strong>Goal & Formula:</strong> Encoder-decoder contracting/expanding path with skip connections, evaluated via Dice Loss $= 1 - \frac{2|A \cap B|}{|A| + |B|}$.</p>
+        <div class="callout green">
+          <strong>🏆 Vision Milestone:</strong> Provides full per-pixel semantic and instance segmentation maps for medical and robotic vision.
+        </div>
+      </div>
+
+      <!-- 14. Model Evaluation & Regularization -->
+      <div class="interactive-card">
+        <h3>14. Model Evaluation & Regularization <a href="../lessons/0015-model-evaluation-regularization.html" style="font-size:0.85rem;">[Lesson 0015]</a></h3>
+        <p><strong>Goal & Formula:</strong> Prevent overfitting via L1 Lasso ($\lambda |w|$), L2 Ridge ($\lambda \|w\|^2$), Dropout, and cross-validation metrics ($F_1, \text{ROC-AUC}$).</p>
+        <div class="callout green">
+          <strong>📐 Universal Rule:</strong> Essential validation methodology for all machine learning and deep learning pipelines.
+        </div>
+      </div>
+
+      <!-- 15. Text Embeddings -->
+      <div class="interactive-card">
+        <h3>15. Text Embeddings & NLP (TF-IDF & Word2Vec) <a href="../lessons/0016-text-embeddings-nlp.html" style="font-size:0.85rem;">[Lesson 0016]</a></h3>
+        <p><strong>Goal & Formula:</strong> Map raw text into dense semantic vector spaces where vector distance reflects meaning: $\text{CosSim}(A,B) = \frac{A \cdot B}{\|A\| \|B\|}$.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Word2Vec produces static embeddings (e.g. "Apple" phone vs "Apple" fruit share the exact same single vector).
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> We need dynamic sequential state context across time $\implies$ <strong>Sequence Models (LSTMs)</strong>.
+        </div>
+      </div>
+
+      <!-- 16. Sequence Models -->
+      <div class="interactive-card">
+        <h3>16. Sequence Models (RNNs, LSTMs & GRUs) <a href="../lessons/0017-rnn-lstm-sequences.html" style="font-size:0.85rem;">[Lesson 0017]</a></h3>
+        <p><strong>Goal & Formula:</strong> Maintain recurrent hidden states $h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t)$ with gated memory cells (Forget, Input, Output gates) to prevent vanishing gradients.</p>
+        <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+          <strong>⚠️ Major Drawback:</strong> Sequential computation ($t-1 \to t$) prevents GPU parallelization during training, creating a bottleneck on long text sequences.
+        </div>
+        <div class="callout green">
+          <strong>💡 Why Move to Next Algorithm?</strong> Process all sequence tokens simultaneously in parallel using self-attention matrix multiplication $\implies$ <strong>Transformers</strong>.
+        </div>
+      </div>
+
+      <!-- 17. Transformers -->
+      <div class="interactive-card">
+        <h3>17. Transformers & Self-Attention <a href="../lessons/0018-transformers-attention.html" style="font-size:0.85rem;">[Lesson 0018]</a></h3>
+        <p><strong>Goal & Formula:</strong> Scaled Dot-Product Self-Attention: $\text{Attention}(Q, K, V) = \text{Softmax}\left( \frac{Q K^T}{\sqrt{d_k}} \right) V$.</p>
+        <div class="callout green">
+          <strong>🚀 Modern Foundation AI:</strong> Eliminates sequential recurrence, enabling massive parallel pre-training for modern Large Language Models (LLMs)!
+        </div>
+      </div>
+
+      <!-- 18. Generative AI -->
+      <div class="interactive-card">
+        <h3>18. Generative AI (GANs, VAEs & Diffusion Models) <a href="../lessons/0019-generative-ai-gans-diffusion.html" style="font-size:0.85rem;">[Lesson 0019]</a></h3>
+        <p><strong>Goal & Formula:</strong> Generate new synthetic data using Adversarial Minimax $\min_G \max_D V(D,G)$ or Latent Diffusion Noise Denoising $L_{\text{simple}} = \mathbb{E}\left[\|\epsilon - \epsilon_\theta(x_t, t)\|^2\right]$.</p>
+        <div class="callout green">
+          <strong>🎨 The Frontier:</strong> Powers state-of-the-art text-to-image generation, synthetic voice, video synthesis, and creative AI.
+        </div>
+      </div>
+
+    </section>
   </main>
 
   <footer>
-    <p>Machine Learning Cheat Sheet • Algorithm Evolution</p>
+    <p>Machine Learning Zero to Hero • Master Reference Cheat Sheet</p>
   </footer>
 </body>
 </html>

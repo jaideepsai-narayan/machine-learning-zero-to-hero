@@ -53,7 +53,7 @@ Every concept is presented through a structured 4-part framework:
 - 🎨 **100% Zero-Dependency Web App**: Runs directly in any modern browser without needing Node.js, Webpack, or heavy build tools.
 - 🧮 **MathJax Integration**: Crisp LaTeX mathematical equations rendered seamlessly alongside intuition visualizers.
 - 🔥 **PyTorch Code Cheat Sheet**: Includes a dedicated [PyTorch Cheat Sheet](reference/pytorch-implementations-cheatsheet.html) containing ready-to-run PyTorch code snippets for all 19 algorithms.
-- 📐 **Grand Evolution Cheat Sheet**: Includes the [Classification & Ensemble Cheat Sheet](reference/classification-ensemble-cheatsheet.html) summarizing decision boundaries, pros/cons, and time complexities.
+- 📐 **Grand Master Cheat Sheet & Math Matrix**: Includes the comprehensive [Grand Master Cheat Sheet](reference/classification-ensemble-cheatsheet.html) summarizing objectives, time complexities, hyperparameters, and evolutionary transitions for all 19 lessons.
 - 🌐 **Responsive & Accessible Design**: Built with clean CSS tokens, modern typography, glassmorphism UI components, and keyboard/touch navigation.
 
 ---
