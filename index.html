@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machine Learning Zero to Hero — Master Course Hub</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .roadmap-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      position: relative;
+      margin: 2rem 0;
+    }
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--primary-color), var(--accent-color), var(--accent-pink));
+      border-radius: 2px;
+    }
+    .timeline-item {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      position: relative;
+    }
+    .timeline-node {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .timeline-content {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      flex-grow: 1;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .timeline-content h3 {
+      margin-top: 0;
+      color: var(--primary-color);
+    }
+    .btn-start {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: var(--primary-color);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .btn-start:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="badge">Comprehensive Master Curriculum</span>
+    <h1>Machine Learning Zero to Hero 🚀</h1>
+    <div class="meta">
+      <span>Designed for Complete Beginners</span>
+      <span>Total Lessons: 19 (Numerically Ordered 0001 - 0019)</span>
+      <span><a href="reference/classification-ensemble-cheatsheet.html">Grand Cheat Sheet</a></span>
+      <span><a href="reference/pytorch-implementations-cheatsheet.html">🔥 PyTorch Code Guide</a></span>
+    </div>
+  </header>
+
+  <main>
+    <p>
+      Welcome to your complete Machine Learning course! Every algorithm is arranged in exact numerical sequence from <strong>Lesson 0001 to 0019</strong>, explaining <strong>WHY</strong>, <strong>WHAT IS IT</strong>, <strong>HOW DOES IT WORK</strong>, and providing full <strong>PyTorch code implementations</strong>!
+    </p>
+
+    <div class="roadmap-timeline">
+
+      <!-- MODULE 1 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M1</div>
+        <div class="timeline-content">
+          <h3>Module 1: Foundations of Regression & Optimization</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 1 • Lesson 0001: What is Machine Learning? (Pizza Mystery)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Fit a line $y = mx + b$ to pizza prices with interactive sliders.</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Can only output continuous numbers, not Yes/No choices!</div>
+              <a href="lessons/0001-what-is-machine-learning.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0001 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 2 • Lesson 0002: How AI Measures Mistakes (Loss & MSE)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Derive Mean Squared Error (MSE) and visualize residual error lines live.</p>
+              <a href="lessons/0002-linear-regression-loss.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0002 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 3 • Lesson 0003: Skiing Down Loss Mountain (Gradient Descent)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Feel the ground slope downhill to update weights: $m_{\text{new}} = m - \alpha \frac{d\text{Loss}}{dm}$.</p>
+              <a href="lessons/0003-gradient-descent.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0003 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 2 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M2</div>
+        <div class="timeline-content">
+          <h3>Module 2: Linear & Kernel Classification</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 4 • Lesson 0004: Sorting Things (Logistic Regression & Sigmoid)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Squish continuous scores into 0 to 1 probabilities using Sigmoid $\sigma(z) = \frac{1}{1 + e^{-z}}$.</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Can only draw a SINGLE FLAT LINE decision boundary!</div>
+              <a href="lessons/0004-logistic-regression.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0004 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 5 • Lesson 0005: Support Vector Machines (SVMs) & The Kernel Trick</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Find the Maximum Margin street ($\frac{2}{\|w\|}$) and project non-linear data into 3D using RBF Kernels!</p>
+              <a href="lessons/0005-support-vector-machines.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0005 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 3 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M3</div>
+        <div class="timeline-content">
+          <h3>Module 3: Non-Linear Decision Trees & Ensembles</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 6 • Lesson 0006: Decision Trees & 20 Questions Game</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Partition data using Entropy $H(S)$ and Gini Impurity. Interactive tree node splitter widget.</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Severe Overfitting & High Variance on deep trees!</div>
+              <a href="lessons/0006-decision-trees.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0006 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 7 • Lesson 0007: Bagging & Random Forests</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Train parallel independent trees with bootstrapped rows and random feature subsets ($\sqrt{M}$).</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Trees are built independently; hard samples get ignored if majority votes wrong.</div>
+              <a href="lessons/0007-bagging-random-forests.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0007 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 8 • Lesson 0008: Boosting Algorithms (AdaBoost & XGBoost)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Sequential residual fitting $F_m(x) = F_{m-1}(x) + \eta h_m(x)$. The pinnacle of tabular ML!</p>
+              <a href="lessons/0008-boosting-adaboost-xgboost.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0008 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 4 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M4</div>
+        <div class="timeline-content">
+          <h3>Module 4: Unsupervised Learning & Dimensionality Reduction</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 9 • Lesson 0009: Dimensionality Reduction (PCA, t-SNE & UMAP)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Beat the Curse of Dimensionality by maximizing variance along Covariance Eigenvectors.</p>
+              <a href="lessons/0009-dimensionality-reduction-pca.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0009 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 10 • Lesson 0010: Unsupervised Clustering (K-Means & DBSCAN)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Discover secret patterns without labels using K-Means centroids and DBSCAN density regions.</p>
+              <a href="lessons/0010-unsupervised-clustering.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0010 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 5 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M5</div>
+        <div class="timeline-content">
+          <h3>Module 5: Deep Learning Foundations & Neurons</h3>
+          <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+            <strong>Step 11 • Lesson 0011: Neural Networks & Backpropagation Math</strong>
+            <p style="font-size: 0.95rem; margin: 0.4rem 0;">Artificial Neurons, Perceptrons, and rigorous derivation of reverse-mode automatic differentiation $\delta^{[l]} = (W^{[l+1]})^T \delta^{[l+1]} \odot \sigma'(z^{[l]})$. Includes PyTorch <code>torch.nn.Module</code> implementation.</p>
+            <a href="lessons/0011-backpropagation.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0011 &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 6 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M6</div>
+        <div class="timeline-content">
+          <h3>Module 6: Computer Vision & Spatial Intelligence</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 12 • Lesson 0012: CNNs & Image Classification</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">2D Filter Convolutions, ReLU, Max Pooling, and ResNet skip connections $F(x) + x$. Includes PyTorch <code>nn.Conv2d</code> code.</p>
+              <a href="lessons/0012-cnn-image-classification.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0012 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 13 • Lesson 0013: Object Detection (Bounding Boxes, IoU & YOLO)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Locate objects using $[x, y, w, h]$, Intersection over Union (IoU), real-time YOLO, and NMS.</p>
+              <a href="lessons/0013-object-detection.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0013 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 14 • Lesson 0014: Image Segmentation (Semantic vs Instance & U-Net)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Classify every pixel using U-Net Encoder-Decoder architectures and Skip Connections.</p>
+              <a href="lessons/0014-image-segmentation.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0014 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 7 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M7</div>
+        <div class="timeline-content">
+          <h3>Module 7: Model Evaluation & Regularization</h3>
+          <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+            <strong>Step 15 • Lesson 0015: Evaluation Metrics & Regularization</strong>
+            <p style="font-size: 0.95rem; margin: 0.4rem 0;">Bias-Variance Tradeoff, $L_1$ Lasso, $L_2$ Ridge, Precision, Recall, and Confusion Matrix.</p>
+            <a href="lessons/0015-model-evaluation-regularization.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0015 &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 8 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M8</div>
+        <div class="timeline-content">
+          <h3>Module 8: Natural Language Processing (NLP) & Sequence Intelligence</h3>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 16 • Lesson 0016: NLP Foundations (Tokenization, TF-IDF & Word2Vec)</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Represent words as dense vectors: $\text{Vector}(\text{King}) - \text{Vector}(\text{Man}) + \text{Vector}(\text{Woman}) \approx \text{Vector}(\text{Queen})$.</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Static embeddings ignore sequential order and context!</div>
+              <a href="lessons/0016-text-embeddings-nlp.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0016 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 17 • Lesson 0017: Sequential Models, RNNs & LSTMs</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Handle time-series and text sequences with recurrent memory loops and LSTM forget gates. Includes PyTorch <code>nn.LSTM</code> code.</p>
+              <div style="font-size: 0.85rem; color: var(--alert-border);">⚠️ Drawback: Sequential step-by-step processing cannot be parallelized on GPUs!</div>
+              <a href="lessons/0017-rnn-lstm-sequences.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0017 &rarr;</a>
+            </div>
+
+            <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+              <strong>Step 18 • Lesson 0018: The Transformer Architecture & Self-Attention</strong>
+              <p style="font-size: 0.95rem; margin: 0.4rem 0;">Process sequences in parallel with Query, Key, Value vectors and Scaled Dot-Product Attention. Includes PyTorch <code>nn.MultiheadAttention</code> code.</p>
+              <a href="lessons/0018-transformers-attention.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0018 &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODULE 9 -->
+      <div class="timeline-item">
+        <div class="timeline-node">M9</div>
+        <div class="timeline-content">
+          <h3>Module 9: Generative AI & Latent Models</h3>
+          <div style="background: var(--bg-color); padding: 1rem; border-radius: 10px;">
+            <strong>Step 19 • Lesson 0019: Generative AI (GANs, VAEs & Diffusion)</strong>
+            <p style="font-size: 0.95rem; margin: 0.4rem 0;">Generate synthetic media using GAN Minimax battles, VAE Latent Spaces, and Diffusion score matching.</p>
+            <a href="lessons/0019-generative-ai-gans-diffusion.html" class="btn-start" style="margin-top: 0.5rem;">Launch Lesson 0019 &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>Machine Learning Zero to Hero • Master Course Hub</p>
+  </footer>
+</body>
+</html>

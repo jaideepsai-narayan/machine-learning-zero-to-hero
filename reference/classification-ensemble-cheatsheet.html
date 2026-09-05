@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: The Grand Evolution of Machine Learning Algorithms</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script>
+    MathJax = {
+      options: {
+        ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+        processHtmlClass: 'tex2jax_process'
+      },
+      tex: {
+        inlineMath: [['$', '$'], ['\(', '\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <header>
+    <h1>The Grand Evolution of Machine Learning Algorithms</h1>
+    <div class="meta">
+      <span>Topic: Algorithm Evolution, Drawbacks & Transitions</span>
+      <span><a href="../lessons/0008-boosting-adaboost-xgboost.html">&larr; Lesson 0008</a></span>
+    </div>
+  </header>
+
+  <main>
+    <p>
+      Every major algorithm in machine learning was invented to fix a specific flaw in the algorithm before it. Below is the complete evolutionary timeline from simple lines to gradient boosted trees:
+    </p>
+
+    <div class="interactive-card">
+      <h2>1. Linear Regression</h2>
+      <p><strong>Goal & Formula:</strong> Fit a continuous straight line $y = m \cdot x + b$ by minimizing Mean Squared Error (MSE).</p>
+      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+        <strong>⚠️ Major Drawback:</strong> Outputs unbounded continuous numbers ($-\infty, +\infty$). It cannot handle binary (Yes/No) classification or predict probabilities.
+      </div>
+      <div class="callout green">
+        <strong>💡 Why Move to Next Algorithm?</strong> We need a function to squish continuous outputs into probabilities between 0.0 and 1.0 $\implies$ <strong>Logistic Regression</strong>.
+      </div>
+    </div>
+
+    <div class="interactive-card">
+      <h2>2. Logistic Regression</h2>
+      <p><strong>Goal & Formula:</strong> Pass linear output through the Sigmoid S-curve: $\hat{p} = \frac{1}{1 + e^{-(mx+b)}}$, minimizing Log Loss.</p>
+      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+        <strong>⚠️ Major Drawback:</strong> Can only draw a single <em>linear (flat) decision boundary</em> in feature space. Completely fails on non-linearly separable data (e.g., XOR patterns or complex nested features) without manual feature engineering.
+      </div>
+      <div class="callout green">
+        <strong>💡 Why Move to Next Algorithm?</strong> We need non-linear decision boundaries that automatically partition feature space without manual math transformations $\implies$ <strong>Decision Trees</strong>.
+      </div>
+    </div>
+
+    <div class="interactive-card">
+      <h2>3. Decision Trees</h2>
+      <p><strong>Goal & Formula:</strong> Recursively split data using feature threshold questions that maximize Information Gain (or minimize Gini Impurity $G = 1 - \sum p_i^2$).</p>
+      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+        <strong>⚠️ Major Drawback:</strong> High Variance & Overfitting! A deep decision tree memorizes noise in the training data, resulting in poor generalization on unseen test data.
+      </div>
+      <div class="callout green">
+        <strong>💡 Why Move to Next Algorithm?</strong> We need to reduce high variance by averaging hundreds of independent trees trained on random subsets $\implies$ <strong>Bagging & Random Forests</strong>.
+      </div>
+    </div>
+
+    <div class="interactive-card">
+      <h2>4. Bagging & Random Forests</h2>
+      <p><strong>Goal & Formula:</strong> Train $B$ independent decision trees in parallel using bootstrapped row samples and random feature subsets ($\sqrt{M}$). Aggregate predictions via majority vote or averaging.</p>
+      <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+        <strong>⚠️ Major Drawback:</strong>
+        1. Trees are built independently, so hard-to-predict samples get ignored if the majority vote gets them wrong.
+        2. High Bias if the base trees are too shallow.
+      </div>
+      <div class="callout green">
+        <strong>💡 Why Move to Next Algorithm?</strong> Instead of building trees independently in parallel, build trees <em>sequentially</em>, where each new tree specifically fixes the residual mistakes of all prior trees $\implies$ <strong>Boosting (AdaBoost / XGBoost)</strong>.
+      </div>
+    </div>
+
+    <div class="interactive-card">
+      <h2>5. Boosting (AdaBoost, Gradient Boosting & XGBoost)</h2>
+      <p><strong>Goal & Formula:</strong> Build sequential ensembles fitting residuals: $F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)$.</p>
+      <div class="callout green">
+        <strong>🏆 Why It Dominates:</strong> Combines weak learners into an optimal strong learner, achieving state-of-the-art performance on tabular data!
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Machine Learning Cheat Sheet • Algorithm Evolution</p>
+  </footer>
+</body>
+</html>

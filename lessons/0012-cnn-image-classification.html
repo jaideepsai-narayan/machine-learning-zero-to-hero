@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0012: CNNs & Image Classification</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 6 • Lesson 12</span>
+  <h1>Computer Vision: CNNs & Image Classification 👁️</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Convolutions, Kernels, Feature Maps, ReLU, Max Pooling & ResNet</span>
+   <span><a href="../lessons/0011-backpropagation.html">&larr; Lesson 0011</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do Standard Networks Fail on Images? (Drawbacks of 1D Pixel Flattening)</h2>
+   <p>
+    If you take a $256 \times 256$ color image, it contains $256 \times 256 \times 3 = 196,608$ pixel inputs! Connecting this to a hidden layer of 1,000 neurons requires <strong>~200 million weight parameters</strong>!
+   </p>
+
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ Major Problem:</strong> Flattening pixels into a 1D vector completely destroys spatial relationships (e.g., an eye being next to a nose).
+   </div>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Convolutional Neural Networks transformed Computer Vision across critical domains:</p>
+    <ul>
+     <li><strong>🏥 Medical Diagnostic Imaging:</strong> Analyzing chest X-rays and mammograms to detect early-stage tumors with radiologist-level accuracy.</li>
+     <li><strong>🚗 Autonomous Vehicle Perception:</strong> Processing multi-camera 60FPS video feeds to detect lane lines, traffic lights, and pedestrians.</li>
+     <li><strong>🏭 Industrial Visual Inspection:</strong> Scanning microchips on assembly lines for sub-millimeter manufacturing defects.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Sliding 2D Convolutions & Feature Maps)</h2>
+   <p>
+    Instead of connecting every pixel to every neuron, a <strong>Convolutional Layer</strong> slides a small $3 \times 3$ matrix filter (Kernel) across the image to detect local features like edges, curves, and textures!
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">2D Discrete Convolution Formula</div>
+    \[ S(i,j) = (I * K)(i,j) = \sum_{m} \sum_{n} I(i - m, j - n) K(m, n) \]
+   </div>
+
+   <h3>The CNN Pipeline Steps:</h3>
+   <ol>
+    <li><strong>Convolution:</strong> Slide filters to generate Feature Maps.</li>
+    <li><strong>Activation (ReLU):</strong> Apply $f(x) = \max(0, x)$ to zero out negative activations.</li>
+    <li><strong>Max Pooling:</strong> Take the maximum value in every $2 \times 2$ grid to reduce image size by half.</li>
+    <li><strong>Fully Connected (FC) Layer:</strong> Flatten final small feature maps and output class probabilities via Softmax!</li>
+   </ol>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Convolution Formula $(I*K)$, ReLU, Max Pooling, and ResNet Skip Connections)</h2>
+   <ul>
+    <li><strong>LeNet-5 (1998):</strong> First practical CNN for handwritten digits (Yann LeCun).</li>
+    <li><strong>AlexNet (2012):</strong> Sparked the modern AI revolution by using GPUs and ReLU.</li>
+    <li><strong>VGG (2014):</strong> Proved that small $3 \times 3$ filters stacked deep work best.</li>
+    <li><strong>ResNet (2015):</strong> Solved the <em>Vanishing Gradient Problem</em> in super-deep networks (152+ layers) using <strong>Residual Skip Connections</strong>: $y = F(x) + x$.</li>
+   </ul>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">📐 Spatial Dimension Math, Data Augmentation & Transfer Learning</div>
+    <ul>
+     <li><strong>Convolution Output Dimension Formula:</strong> Given an input of width $, filter kernel size $, padding $, and stride $, the output feature map dimension is:</li>
+     \[ O = \left\lfloor \frac{W - F + 2P}{S} 
+ight
+floor + 1 \]
+     <li><strong>Data Augmentation:</strong> Prevents spatial memorization by applying random transformations during training (random crops, horizontal flips, 15° rotations, brightness shifts).</li>
+     <li><strong>Transfer Learning & Fine-Tuning:</strong> Instead of training a 25-million parameter CNN from scratch on a small dataset, developers load pre-trained ImageNet weights (e.g., ResNet, ConvNeXt), freeze the feature extractor backbone, and fine-tune only the final output layer!</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Convolution & Feature Map Visualizer 🚀</h2>
+   <p>Click "Slide 3x3 Kernel Filter" to watch the matrix convolution perform dot products and generate feature activation maps!</p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="btn btn-primary no-math" onclick="toggleViewMode()">📊 Toggle View: 2D Sliding Kernel / 3D Feature Volume</button>
+     <button class="btn btn-primary" onclick="slideFilter()">
+      🔍 Slide 3x3 Kernel Filter
+     </button>
+    </div>
+
+    <div class="canvas-stack">
+     <div class="visual-canvas-box">
+      <div class="canvas-header">📊 2D Image Grid, Sobel Kernel & Output Feature Map</div>
+      <canvas id="cnn-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     <div class="visual-canvas-box">
+      <div class="canvas-header">🌐 3D Feature Map Volume (Drag to Rotate)</div>
+      <canvas id="cnn-3d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+    </div>
+
+    <div id="cnn-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--primary-color);">
+     Kernel at (0,0): Convoluted activation score = +4.5 (Edge Detected!)
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Computer Vision Architectures</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Approach</th>
+       <th style="padding: 10px;">Parameters Required</th>
+       <th style="padding: 10px;">Spatial Invariance</th>
+       <th style="padding: 10px;">Data Needed</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Flat MLP (Fully Connected)</strong></td>
+       <td style="padding: 10px; color: var(--accent-pink);">Massive ((W \text{imes} H)$ weights)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Zero (Breaks on pixel shifts)</td>
+       <td style="padding: 10px;">Large</td>
+       <td style="padding: 10px;">Small tabular vectors only (Never for images)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Custom CNN from Scratch</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">Compact (Weight Sharing)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">High (Translation Invariance)</td>
+       <td style="padding: 10px;">10,000+ images per class</td>
+       <td style="padding: 10px;">Unique specialized imagery (e.g. satellite SAR radar)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Transfer Learning (ResNet / EfficientNet)</strong></td>
+       <td style="padding: 10px;">Pre-trained Backbone + Small Head</td>
+       <td style="padding: 10px; color: var(--accent-teal);">State-of-the-art</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Low (100-500 images per class)</td>
+       <td style="padding: 10px;">Default industry standard for image classification tasks</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    <div class="quiz-question">
+     How do Residual Skip Connections ($y = F(x) + x$) in ResNet prevent vanishing gradients in deep networks?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! The identity shortcut +x allows gradients to flow backwards directly without being repeatedly multiplied by small weight matrices.')">
+      A) They allow gradients to flow backwards directly through the identity shortcut (+x) uninterrupted.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Skip connections preserve spatial resolution.')">
+      B) They compress 2D images down to 1D vectors instantly.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Skip connections work independently of kernel size.')">
+      C) They force all filter kernels to be size 1x1.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0011-backpropagation.html">&larr; Lesson 0011: Backpropagation Proof</a>
+   <a href="../lessons/0013-object-detection.html">Next Lesson 0013: Object Detection &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0012</p>
+ </footer>
+
+ <script>
+  const canvas2d = document.getElementById('cnn-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  const canvas3d = document.getElementById('cnn-3d');
+  const ctx3d = canvas3d.getContext('2d');
+
+  let filterPos = 0;
+  let angleX = 0.4;
+  let angleY = 0.5;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+  let is3DMode = false;
+
+  canvas3d.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas3d.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas3d.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   angleY += (e.clientX - prevMouseX) * 0.01;
+   angleX += (e.clientY - prevMouseY) * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  // 5x5 Image Input Matrix Values (Vertical Edge Pattern)
+  const imageGrid = [
+   [10, 10, 255, 255, 255],
+   [10, 10, 255, 255, 255],
+   [10, 10, 255, 255, 255],
+   [10, 10, 255, 255, 255],
+   [10, 10, 255, 255, 255]
+  ];
+
+  // Calculated 3x3 Feature Map Output Scores
+  const featureMapScores = [
+   [+4.5, +9.0, +2.1],
+   [+5.0, +9.5, +2.5],
+   [+4.8, +9.2, +2.3]
+  ];
+
+  function project3D(x, y, z) {
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   const cx = canvas3d.width / 2 + x1 * 1.1;
+   const cy = canvas3d.height / 2 + y2 * 1.1;
+   return { px: cx, py: cy, depth: z2 };
+  }
+
+  function renderCNN() {
+   // 1. Fill White Backgrounds
+   ctx2d.fillStyle = '#ffffff'; ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx3d.fillStyle = '#ffffff'; ctx3d.fillRect(0, 0, canvas3d.width, canvas3d.height);
+
+   // --- RENDER 2D CANVAS ---
+   // Draw 5x5 Input Image Matrix
+   const cellSize = 40;
+   const startX = 40, startY = 50;
+
+   ctx2d.fillStyle = '#475569';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('5x5 Input Image Grid I(x,y)', startX, startY - 15);
+
+   for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 5; c++) {
+     const val = imageGrid[r][c];
+     ctx2d.fillStyle = `rgb(${val}, ${val}, ${val})`;
+     ctx2d.fillRect(startX + c * cellSize, startY + r * cellSize, cellSize, cellSize);
+     ctx2d.strokeStyle = '#94a3b8';
+     ctx2d.lineWidth = 1;
+     ctx2d.strokeRect(startX + c * cellSize, startY + r * cellSize, cellSize, cellSize);
+    }
+   }
+
+   // 3x3 Sliding Kernel Box
+   const col = filterPos % 3;
+   const row = Math.floor(filterPos / 3);
+   const fx = col * cellSize;
+   const fy = row * cellSize;
+
+   ctx2d.fillStyle = 'rgba(79, 70, 229, 0.3)';
+   ctx2d.fillRect(startX + fx, startY + fy, cellSize * 3, cellSize * 3);
+   ctx2d.strokeStyle = '#4f46e5';
+   ctx2d.lineWidth = 3;
+   ctx2d.strokeRect(startX + fx, startY + fy, cellSize * 3, cellSize * 3);
+
+   // Arrow from Kernel to Output Feature Map
+   ctx2d.beginPath();
+   ctx2d.moveTo(270, 150);
+   ctx2d.lineTo(330, 150);
+   ctx2d.strokeStyle = '#4f46e5';
+   ctx2d.lineWidth = 2.5;
+   ctx2d.stroke();
+
+   ctx2d.fillStyle = '#4f46e5';
+   ctx2d.font = 'bold 11px Inter, sans-serif';
+   ctx2d.fillText('3x3 Conv Filter *', 268, 140);
+
+   // Draw 3x3 Output Feature Map Grid
+   const mapStartX = 360, mapStartY = 70;
+   ctx2d.fillStyle = '#1e293b';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('3x3 Feature Map Output O(i,j)', mapStartX, mapStartY - 15);
+
+   for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+     const isCurrent = (r === row && c === col);
+     ctx2d.fillStyle = isCurrent ? '#4f46e5' : '#f1f5f9';
+     ctx2d.fillRect(mapStartX + c * 50, mapStartY + r * 50, 50, 50);
+     ctx2d.strokeStyle = isCurrent ? '#4f46e5' : '#cbd5e1';
+     ctx2d.lineWidth = isCurrent ? 2.5 : 1.5;
+     ctx2d.strokeRect(mapStartX + c * 50, mapStartY + r * 50, 50, 50);
+
+     ctx2d.fillStyle = isCurrent ? '#ffffff' : '#334155';
+     ctx2d.font = 'bold 11px Inter, sans-serif';
+     ctx2d.textAlign = 'center';
+     ctx2d.textBaseline = 'middle';
+     ctx2d.fillText(featureMapScores[r][c].toFixed(1), mapStartX + c * 50 + 25, mapStartY + r * 50 + 25);
+    }
+   }
+   ctx2d.textAlign = 'left';
+   ctx2d.textBaseline = 'alphabetic';
+
+   // --- RENDER 3D CANVAS ---
+   // Render 4 stacked 3D Feature Map Slices
+   const slices = [-50, -15, 20, 55];
+   slices.forEach((slice, idx) => {
+    const p1 = project3D(-80, -80, slice);
+    const p2 = project3D(80, -80, slice);
+    const p3 = project3D(80, 80, slice);
+    const p4 = project3D(-80, 80, slice);
+
+    const isTop = (idx === slices.length - 1);
+    ctx3d.fillStyle = isTop ? 'rgba(34, 197, 94, 0.25)' : 'rgba(79, 70, 229, 0.18)';
+    ctx3d.strokeStyle = isTop ? '#22c55e' : '#4f46e5';
+    ctx3d.lineWidth = isTop ? 2.5 : 1.5;
+
+    ctx3d.beginPath();
+    ctx3d.moveTo(p1.px, p1.py); ctx3d.lineTo(p2.px, p2.py);
+    ctx3d.lineTo(p3.px, p3.py); ctx3d.lineTo(p4.px, p4.py);
+    ctx3d.closePath();
+    ctx3d.fill(); ctx3d.stroke();
+
+    ctx3d.fillStyle = isTop ? '#15803d' : '#4338ca';
+    ctx3d.font = 'bold 11px Inter, sans-serif';
+    ctx3d.fillText(`Conv Layer ${idx+1} Volume`, p2.px + 5, p2.py);
+   });
+
+   requestAnimationFrame(renderCNN);
+  }
+
+  function slideFilter() {
+   filterPos = (filterPos + 1) % 9;
+   const col = filterPos % 3;
+   const row = Math.floor(filterPos / 3);
+   const score = featureMapScores[row][col];
+   document.getElementById('cnn-status').innerText = `Kernel shifted to (${col},${row}): Dot product activation score = +${score.toFixed(1)}! Feature map cell updated.`;
+  }
+
+  function toggleViewMode() {
+   is3DMode = !is3DMode;
+   const btn = document.getElementById('view-toggle-btn');
+   const c2d = document.getElementById('cnn-2d').parentElement;
+   const c3d = document.getElementById('cnn-3d').parentElement;
+
+   if (btn) {
+    btn.innerText = is3DMode ? '🌐 View: 3D Feature Volumes Stack' : '📊 View: 2D Sliding Kernel & Feature Map';
+    btn.style.background = is3DMode ? 'var(--accent-pink)' : 'var(--primary-color)';
+   }
+   if (c2d && c3d) {
+    c2d.style.display = is3DMode ? 'none' : 'block';
+    c3d.style.display = is3DMode ? 'block' : 'none';
+   }
+  }
+
+  // Ensure initial state: 2D visible, 3D hidden
+  document.addEventListener('DOMContentLoaded', () => {
+   const c2d = document.getElementById('cnn-2d').parentElement;
+   const c3d = document.getElementById('cnn-3d').parentElement;
+   if (c2d && c3d) {
+    c2d.style.display = 'block';
+    c3d.style.display = 'none';
+   }
+  });
+
+  renderCNN();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

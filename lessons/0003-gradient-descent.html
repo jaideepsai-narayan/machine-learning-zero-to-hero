@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0003: Skiing Down Loss Mountain (Gradient Descent)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 1 • Lesson 3</span>
+  <h1>Skiing Down Loss Mountain ⛷️</h1>
+  <div class="meta">
+   <span>Level: Beginner</span>
+   <span>Topic: Intuition of Gradient Descent & Learning Rates</span>
+   <span><a href="../lessons/0002-linear-regression-loss.html">&larr; Lesson 0002</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Gradient Descent? (Drawbacks of Brute-Force Searching)</h2>
+   <p>
+    Imagine you are standing on a steep mountain peak in pitch-black darkness during a fog storm. Your goal is to reach the lowest valley (where <strong>Loss = 0</strong>).
+   </p>
+   <p>
+    Since you cannot see the whole mountain, what do you do? You feel the ground beneath your boots:
+   </p>
+   <ul>
+    <li>If the ground slopes UP to the right &rarr; step LEFT!</li>
+    <li>If the ground slopes DOWN to the right &rarr; step RIGHT!</li>
+    <li>Take a step, feel the slope again, and repeat until the ground is flat ($\text{slope} = 0$).</li>
+   </ul>
+   <p>
+    This exact procedure is called <strong>Gradient Descent</strong>!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Gradient Descent is the universal engine of modern AI. Every giant model in existence was trained by this exact algorithm:</p>
+    <ul>
+     <li><strong>🤖 Large Language Models (ChatGPT / Claude):</strong> Modern LLMs update 70+ billion parameters over trillion token steps using variants of Mini-Batch Adam optimizer.</li>
+     <li><strong>🚗 Autonomous Driving (Tesla / Waymo):</strong> Vision models update millions of weights overnight by calculating loss gradients on petabytes of driving footage.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (The Foggy Mountain Skiing Analogy)</h2>
+   <p>
+    In calculus, the steepness and direction of the ground is called the <strong>Derivative</strong> (or Gradient), written as $\frac{d\text{Loss}}{dm}$.
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The Gradient Descent Formula</div>
+    \[ m_{\text{new}} = m_{\text{old}} - \alpha \cdot \frac{d\text{Loss}}{dm} \]
+   </div>
+
+   <p>Let me break down why there is a minus sign and an $\alpha$ (\alpha):</p>
+   <ul>
+    <li><strong>Minus Sign ($-$):</strong> Ensures we always walk <em>opposite</em> to the uphill gradient (walking downhill!).</li>
+    <li><strong>Learning Rate ($\alpha$):</strong> Your step size.
+     <br>• If $\alpha$ is too small (e.g., $0.0001$), you take tiny baby steps and take 100 years to reach the bottom.
+     <br>• If $\alpha$ is too large (e.g., $2.0$), you leap across the mountain and launch off a cliff!
+    </li>
+   </ul>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎛️ The Golden Hyperparameter: Learning Rate (\(\alpha\))</div>
+    <p>The step size parameter \(\alpha\) controls how far downhill the AI steps on each iteration:</p>
+    <ul>
+     <li><strong>Learning Rate Too High (\(\alpha = 1.0\)):</strong> The ski jumper overshoots the valley, bounces to the opposite peak, and the Loss explodes to infinity (\(\text{NaN}\))!</li>
+     <li><strong>Learning Rate Too Low (\(\alpha = 0.00001\)):</strong> Takes tiny baby steps. Training takes weeks and gets trapped in shallow local minima.</li>
+     <li><strong>Optimal Learning Rate (\(\alpha = 0.01\)):</strong> Smooth, fast convergence down to the lowest global loss valley.</li>
+    </ul>
+   </div>
+
+   <div class="callout blue" style="margin-top: 1.5rem;">
+    <div class="callout-title">⚡ Gradient Descent Flavors: Batch vs. SGD vs. Mini-Batch</div>
+    <ul>
+     <li><strong>1. Batch Gradient Descent:</strong> Computes gradients using <em>all \(N\) samples</em> at once. Accurate, but extremely slow and memory-prohibitive for large datasets.</li>
+     <li><strong>2. Stochastic Gradient Descent (SGD):</strong> Computes gradients using <em>1 random sample</em> per step. Lightning fast, but super noisy and zig-zags wildly.</li>
+     <li><strong>3. Mini-Batch SGD (Industry Standard):</strong> Computes gradients using small batches (e.g., 32, 64, or 128 samples). Perfect balance of GPU parallel speed and stability!</li>
+    </ul>
+    <section>
+   <h2>3. HOW Does It Work? (Interactive Ski Loss Mountain Simulator) 🚀</h2>
+   <p>
+    Watch the AI ball ski down the Loss Mountain in real-time! Adjust the Learning Rate ($\alpha$) step size, toggle between 2D Math and 3D Surface views, or drag to rotate in 3D!
+   </p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="toggle-btn no-math" onclick="toggleViewMode()">🌐 View: 2D Curve Mode</button>
+    </div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;" class="no-math">
+     <button class="btn btn-primary" onclick="takeStep()">
+      👟 Take 1 Step Downhill
+     </button>
+     <button class="btn btn-amber" onclick="autoRun()">
+      ▶️ Ski Down Mountain
+     </button>
+     <button class="btn btn-slate" onclick="resetSim()">
+      🔄 Reset Ball Peak
+     </button>
+     
+    </div>
+
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Learning Rate ($\alpha$ step size):</span>
+      <span id="val-lr" style="color: var(--primary-color); font-weight: 700;">0.20</span>
+     </div>
+     <input type="range" id="slider-lr" min="0.05" max="0.95" step="0.05" value="0.20" oninput="updateLR()">
+    </div>
+
+    <div class="visual-canvas-box" style="position: relative; text-align: center; background: #ffffff; border-radius: 12px; padding: 10px; border: 1px solid #1e293b;">
+     <canvas id="gd-canvas-3d" width="600" height="340" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+    </div>
+
+    <div style="text-align: center; font-size: 1.05rem; font-weight: 700; margin-top: 0.75rem; color: var(--text-color);">
+     Weight ($m$): <span id="m-val" style="color: var(--primary-color);">0.50</span> &nbsp;|&nbsp; 
+     Gradient Slope: <span id="slope-val" style="color: #f43f5e;">-4.00</span> &nbsp;|&nbsp;
+     Loss: <span id="loss-val" style="color: var(--accent-pink);">5.00</span>
+    </div>
+   </div>
+  </section>
+
+  <section>
+   <h2>⚡ Practical Decision Guide: Gradient Descent Optimizers</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Variant</th>
+       <th style="padding: 10px;">Batch Size</th>
+       <th style="padding: 10px;">Speed per Step</th>
+       <th style="padding: 10px;">Convergence Stability</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Batch GD</strong></td>
+       <td style="padding: 10px;">Full Dataset (\(N\))</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Slow (High Memory)</td>
+       <td style="padding: 10px;">Deterministic & Smooth</td>
+       <td style="padding: 10px;">Small datasets fitting entirely in RAM</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>SGD (Pure)</strong></td>
+       <td style="padding: 10px;">1 sample</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Ultra-Fast</td>
+       <td style="padding: 10px;">High Noise / Fluctuation</td>
+       <td style="padding: 10px;">Online streaming data with infinite input flow</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Mini-Batch SGD</strong></td>
+       <td style="padding: 10px;">32 to 512</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fast (GPU vectorized)</td>
+       <td style="padding: 10px;">Highly Stable & Efficient</td>
+       <td style="padding: 10px;">Default choice for standard Deep Learning training</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Adam Optimizer</strong></td>
+       <td style="padding: 10px;">Mini-Batch + Adaptive \(\alpha\)</td>
+       <td style="padding: 10px;">Fast</td>
+       <td style="padding: 10px;">Excellent (Momentum + Scaling)</td>
+       <td style="padding: 10px;">Transformers, Computer Vision, Deep Neural Networks</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>4. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     If the slope (gradient $\frac{d\text{Loss}}{dm}$) at our current position is $+6.0$, which direction will the gradient descent update move our weight $m$?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Since update is m_new = m - alpha * (6.0), subtracting a positive number decreases m (moves left).')">
+      A) To the left (decreases $m$), because the minus sign flips positive slope to a downhill step.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Remember the formula has a minus sign: m - alpha * slope.')">
+      B) To the right (increases $m$), because positive slope means we should walk right.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Slope of +6 means the hill is steep, so the weight will change significantly.')">
+      C) The weight stays completely frozen because the slope is positive.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0002-linear-regression-loss.html">&larr; Lesson 0002: Loss Functions & MSE</a>
+   <a href="../lessons/0004-logistic-regression.html">Next Lesson 0004: Logistic Regression &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0003</p>
+ </footer>
+
+ <script>
+  const canvas = document.getElementById('gd-canvas-3d');
+  const ctx = canvas.getContext('2d');
+
+  let m = 0.5;
+  let lr = 0.20;
+  let timer = null;
+  let trail = [];
+
+  let is3D = false;
+  let angleX = 0.5;
+  let angleY = 0.6;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+
+  canvas.addEventListener('mousedown', (e) => {
+   if (!is3D) return;
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas.style.cursor = is3D ? 'grab' : 'default';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging || !is3D) return;
+   angleY += (e.clientX - prevMouseX) * 0.01;
+   angleX += (e.clientY - prevMouseY) * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  function toggleViewMode() {
+   is3D = !is3D;
+   const btn = document.getElementById('view-toggle-btn');
+   btn.innerText = is3D ? '🌐 View: 3D Surface Mode' : '📊 View: 2D Curve Mode';
+   btn.style.background = is3D ? 'var(--accent-pink)' : 'var(--accent-teal)';
+   canvas.style.cursor = is3D ? 'grab' : 'default';
+  }
+
+  function getLoss(w) {
+   return Math.pow(w - 2.5, 2) + 1.0;
+  }
+
+  function project2D(w, loss) {
+   const padX = 60;
+   const padY = 40;
+   const wWidth = canvas.width - 2 * padX;
+   const wHeight = canvas.height - 2 * padY;
+
+   // w range [0, 5], loss range [0, 8]
+   const px = padX + (w / 5.0) * wWidth;
+   const py = canvas.height - padY - (loss / 8.0) * wHeight;
+   return { px, py };
+  }
+
+  function project3D(x, y, z) {
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   const cx = canvas.width / 2 + x1 * 75;
+   const cy = canvas.height / 2 + y2 * 18 + 20;
+   return { px: cx, py: cy, depth: z2 };
+  }
+
+  function updateLR() {
+   lr = parseFloat(document.getElementById('slider-lr').value);
+   document.getElementById('val-lr').innerText = lr.toFixed(2);
+  }
+
+  function render2D() {
+   // Clear with dark slate background
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   const padX = 60;
+   const padY = 40;
+
+   // Draw Grid Lines & Axes
+   ctx.strokeStyle = '#e2e8f0';
+   ctx.lineWidth = 1;
+
+   // Vertical Grid (Weight m)
+   for (let wVal = 0; wVal <= 5; wVal += 1) {
+    const p1 = project2D(wVal, 0);
+    const p2 = project2D(wVal, 8);
+    ctx.beginPath();
+    ctx.moveTo(p1.px, p1.py);
+    ctx.lineTo(p2.px, p2.py);
+    ctx.stroke();
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('m=' + wVal, p1.px, canvas.height - 15);
+   }
+
+   // Horizontal Grid (Loss)
+   for (let lossVal = 0; lossVal <= 8; lossVal += 2) {
+    const p1 = project2D(0, lossVal);
+    const p2 = project2D(5, lossVal);
+    ctx.beginPath();
+    ctx.moveTo(p1.px, p1.py);
+    ctx.lineTo(p2.px, p2.py);
+    ctx.stroke();
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('L=' + lossVal, padX - 10, p1.py + 4);
+   }
+
+   // Axis Titles
+   ctx.fillStyle = '#475569';
+   ctx.font = 'bold 13px Inter, sans-serif';
+   ctx.textAlign = 'center';
+   ctx.fillText('Weight (m)', canvas.width / 2, canvas.height - 3);
+   
+   ctx.save();
+   ctx.translate(18, canvas.height / 2);
+   ctx.rotate(-Math.PI / 2);
+   ctx.fillText('Loss L(m)', 0, 0);
+   ctx.restore();
+
+   // Optimal Minimum Target Marker (m* = 2.5, Loss = 1.0)
+   const optPt = project2D(2.5, 1.0);
+   ctx.setLineDash([4, 4]);
+   ctx.strokeStyle = '#10b981';
+   ctx.lineWidth = 1.5;
+
+   ctx.beginPath();
+   ctx.moveTo(optPt.px, optPt.py);
+   ctx.lineTo(optPt.px, canvas.height - padY);
+   ctx.stroke();
+
+   ctx.beginPath();
+   ctx.moveTo(optPt.px, optPt.py);
+   ctx.lineTo(padX, optPt.py);
+   ctx.stroke();
+   ctx.setLineDash([]);
+
+   ctx.fillStyle = '#10b981';
+   ctx.beginPath();
+   ctx.arc(optPt.px, optPt.py, 6, 0, Math.PI * 2);
+   ctx.fill();
+
+   ctx.fillStyle = '#34d399';
+   ctx.font = 'bold 11px Inter, sans-serif';
+   ctx.textAlign = 'left';
+   ctx.fillText('Global Min (m*=2.5, Loss=1.0)', optPt.px + 10, optPt.py + 4);
+
+   // Draw Parabola Curve L = (m - 2.5)^2 + 1
+   ctx.strokeStyle = '#6366f1';
+   ctx.lineWidth = 3.5;
+   ctx.beginPath();
+   let first = true;
+   for (let wVal = 0.0; wVal <= 5.0; wVal += 0.05) {
+    const l = getLoss(wVal);
+    const pt = project2D(wVal, l);
+    if (first) { ctx.moveTo(pt.px, pt.py); first = false; }
+    else { ctx.lineTo(pt.px, pt.py); }
+   }
+   ctx.stroke();
+
+   // Draw Trail of steps
+   if (trail.length > 1) {
+    ctx.strokeStyle = '#ec4899';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    trail.forEach((wVal, idx) => {
+     const p = project2D(wVal, getLoss(wVal));
+     if (idx === 0) ctx.moveTo(p.px, p.py);
+     else ctx.lineTo(p.px, p.py);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    trail.forEach(wVal => {
+     const p = project2D(wVal, getLoss(wVal));
+     ctx.beginPath();
+     ctx.arc(p.px, p.py, 4, 0, Math.PI * 2);
+     ctx.fillStyle = '#ec4899';
+     ctx.fill();
+    });
+   }
+
+   // Draw Tangent Slope Line at Current m
+   const currentLoss = getLoss(m);
+   const slope = 2 * (m - 2.5);
+   const ptCurr = project2D(m, currentLoss);
+
+   const tangentDx = 0.6;
+   const tangentPt1 = project2D(m - tangentDx, currentLoss - slope * tangentDx);
+   const tangentPt2 = project2D(m + tangentDx, currentLoss + slope * tangentDx);
+
+   ctx.strokeStyle = '#f43f5e';
+   ctx.lineWidth = 2;
+   ctx.beginPath();
+   ctx.moveTo(tangentPt1.px, tangentPt1.py);
+   ctx.lineTo(tangentPt2.px, tangentPt2.py);
+   ctx.stroke();
+
+   // Draw AI Skier Ball
+   ctx.beginPath();
+   ctx.arc(ptCurr.px, ptCurr.py, 9, 0, Math.PI * 2);
+   ctx.fillStyle = '#818cf8';
+   ctx.fill();
+   ctx.strokeStyle = '#ffffff';
+   ctx.lineWidth = 2.5;
+   ctx.stroke();
+
+   // Draw Slope Text Callout
+   ctx.fillStyle = '#f43f5e';
+   ctx.font = 'bold 12px Inter, sans-serif';
+   ctx.textAlign = m > 2.5 ? 'right' : 'left';
+   ctx.fillText('Slope = ' + slope.toFixed(2), ptCurr.px + (m > 2.5 ? -14 : 14), ptCurr.py - 12);
+  }
+
+  function render3D() {
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   // Draw 3D Grid Floor
+   ctx.strokeStyle = '#e2e8f0';
+   ctx.lineWidth = 1;
+   for (let x = -2; x <= 2; x += 1) {
+    const p1 = project3D(x, -2, 0);
+    const p2 = project3D(x, 2, 0);
+    ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+   }
+   for (let y = -2; y <= 2; y += 1) {
+    const p1 = project3D(-2, y, 0);
+    const p2 = project3D(2, y, 0);
+    ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+   }
+
+   // Render 3D Loss Mountain Curve / Surface
+   ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+   ctx.lineWidth = 1.8;
+
+   for (let offset = -1.2; offset <= 1.2; offset += 0.4) {
+    ctx.beginPath();
+    let first = true;
+    for (let wVal = 0.2; wVal <= 4.8; wVal += 0.1) {
+     const l = getLoss(wVal) + offset * offset * 0.5;
+     const pt = project3D((wVal - 2.5), offset, -(l - 1) * 0.8);
+     if (first) { ctx.moveTo(pt.px, pt.py); first = false; }
+     else { ctx.lineTo(pt.px, pt.py); }
+    }
+    ctx.stroke();
+   }
+
+   // Draw Trail of steps
+   if (trail.length > 1) {
+    ctx.strokeStyle = '#ec4899';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    trail.forEach((wVal, idx) => {
+     const p = project3D(wVal - 2.5, 0, -(getLoss(wVal) - 1) * 0.8);
+     if (idx === 0) ctx.moveTo(p.px, p.py);
+     else ctx.lineTo(p.px, p.py);
+    });
+    ctx.stroke();
+
+    trail.forEach(wVal => {
+     const p = project3D(wVal - 2.5, 0, -(getLoss(wVal) - 1) * 0.8);
+     ctx.beginPath();
+     ctx.arc(p.px, p.py, 4, 0, Math.PI * 2);
+     ctx.fillStyle = '#ec4899';
+     ctx.fill();
+    });
+   }
+
+   // Draw AI Skier Ball
+   const ballLoss = getLoss(m);
+   const ballPt = project3D(m - 2.5, 0, -(ballLoss - 1) * 0.8);
+
+   ctx.beginPath();
+   ctx.arc(ballPt.px, ballPt.py, 9, 0, Math.PI * 2);
+   ctx.fillStyle = '#818cf8';
+   ctx.fill();
+   ctx.strokeStyle = '#ffffff';
+   ctx.lineWidth = 2.5;
+   ctx.stroke();
+
+   // Drag instructions text overlay
+   ctx.fillStyle = '#64748b';
+   ctx.font = '11px Inter, sans-serif';
+   ctx.textAlign = 'right';
+   ctx.fillText('🖱️ Drag to rotate 3D view', canvas.width - 15, canvas.height - 15);
+  }
+
+  function renderLoop() {
+   if (is3D) {
+    render3D();
+   } else {
+    render2D();
+   }
+
+   const slope = 2 * (m - 2.5);
+   const ballLoss = getLoss(m);
+   document.getElementById('m-val').innerText = m.toFixed(2);
+   document.getElementById('slope-val').innerText = slope.toFixed(2);
+   document.getElementById('loss-val').innerText = ballLoss.toFixed(2);
+
+   requestAnimationFrame(renderLoop);
+  }
+
+  function takeStep() {
+   trail.push(m);
+   const slope = 2 * (m - 2.5);
+   m = m - lr * slope;
+   if (m < 0.1) m = 0.1;
+   if (m > 4.9) m = 4.9;
+  }
+
+  function autoRun() {
+   if (timer) clearInterval(timer);
+   timer = setInterval(() => {
+    takeStep();
+    if (Math.abs(m - 2.5) < 0.02) {
+     clearInterval(timer);
+     timer = null;
+    }
+   }, 250);
+  }
+
+  function resetSim() {
+   if (timer) clearInterval(timer);
+   m = 0.5;
+   trail = [0.5];
+  }
+
+  resetSim();
+  renderLoop();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

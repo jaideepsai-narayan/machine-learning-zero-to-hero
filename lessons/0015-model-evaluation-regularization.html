@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0015: Evaluation Metrics & Regularization</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 7 • Lesson 15</span>
+  <h1>Model Evaluation & Regularization 🎯</h1>
+  <div class="meta">
+   <span>Level: Intermediate</span>
+   <span>Topic: Bias-Variance Tradeoff, L1/L2 Regularization & Confusion Matrix</span>
+   <span><a href="../lessons/0014-image-segmentation.html">&larr; Lesson 0014</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Can High Training Accuracy Be Misleading? (Drawbacks of Overfitting Noisy Points)</h2>
+   <p>
+    Every machine learning algorithm struggles between two classic failure modes:
+   </p>
+   <ul>
+    <li><strong>High Bias (Underfitting):</strong> The model is too simple (e.g., fitting a straight line to a complex curve). Performs poorly on both training and test data.</li>
+    <li><strong>High Variance (Overfitting):</strong> The model is too complex (e.g., memorizing every single noisy training point). Performs perfectly on training data, but fails on new test data!</li>
+   </ul>
+
+   <div class="callout green">
+    <div class="callout-title">Total Error Decomposition</div>
+    \[ \text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error} (\sigma^2) \]
+   </div>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Naive accuracy leads to catastrophic real-world failures when data is imbalanced:</p>
+    <ul>
+     <li><strong>💳 Credit Card Fraud ($99.9\%$ Imbalance):</strong> A dummy model that predicts "No Fraud" for every single transaction gets $99.9\%$ Accuracy, but misses 100% of millions of dollars in fraudulent transactions!</li>
+     <li><strong>🏥 Oncology Cancer Screening:</strong> A False Negative (missing cancer) is fatal, whereas a False Positive (false alarm) requires only a quick re-test. Recall is far more critical than Accuracy.</li>
+     <li><strong>📧 Spam Filtering:</strong> A False Positive (sending an important job offer to Spam) is far worse than letting a spam email slip into the inbox. Precision is paramount.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (The Bias-Variance Tradeoff & Regularization Penalties)</h2>
+   <p>
+    How do we prevent weights from growing too large and memorizing noise? We add a <strong>penalty term</strong> to the loss function!
+   </p>
+
+   <div class="callout pink">
+    <div class="callout-title">$L_2$ Ridge Regularization (Weight Decay)</div>
+    \[ \text{Loss}_{\text{Ridge}} = \text{MSE} + \lambda \sum_{j=1}^{M} w_j^2 \]
+    Shrinks all weights smoothly toward zero.
+   </div>
+
+   <div class="callout pink">
+    <div class="callout-title">$L_1$ Lasso Regularization (Feature Selection)</div>
+    \[ \text{Loss}_{\text{Lasso}} = \text{MSE} + \lambda \sum_{j=1}^{M} |w_j| \]
+    Drives useless feature weights to EXACTLY ZERO (creates sparse models!).
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? ($L_1$ Lasso, $L_2$ Ridge, Precision, Recall, and Confusion Matrices)</h2>
+   <p>Accuracy can be deceiving on imbalanced data (e.g., 99% of transactions are legitimate). We use:</p>
+
+   <table>
+    <thead>
+     <tr>
+      <th>Metric</th>
+      <th>Formula</th>
+      <th>When to Use</th>
+     </tr>
+    </thead>
+    <tbody>
+     <tr>
+      <td><strong>Precision</strong></td>
+      <td>$\frac{TP}{TP + FP}$</td>
+      <td>When False Positives are expensive (e.g., Spam Filter marking important emails).</td>
+     </tr>
+     <tr>
+      <td><strong>Recall (Sensitivity)</strong></td>
+      <td>$\frac{TP}{TP + FN}$</td>
+      <td>When False Negatives are dangerous (e.g., Missing a Cancer diagnosis).</td>
+     </tr>
+     <tr>
+      <td><strong>$F_1$-Score</strong></td>
+      <td>$2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$</td>
+      <td>Harmonic mean balancing both Precision and Recall.</td>
+     </tr>
+    </tbody>
+   </table>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎯 Confusion Matrix Metrics & The Silent Killer: Data Leakage</div>
+    <ul>
+     <li><strong>Confusion Matrix & Metrics Breakdown:</strong>
+      <ul>
+       <li><strong>Precision:</strong> $\frac{\text{TP}}{\text{TP} + \text{FP}}$ — Out of all positive predictions, how many were actually positive?</li>
+       <li><strong>Recall (Sensitivity):</strong> $\frac{\text{TP}}{\text{TP} + \text{FN}}$ — Out of all actual positive cases, how many did we successfully detect?</li>
+       <li><strong>$F_1$-Score:</strong> Harmonic mean balancing Precision and Recall: $\text{F}_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$.</li>
+      </ul>
+     </li>
+     <li><strong>$L_1$ Lasso vs. $L_2$ Ridge Regularization Geometry:</strong>
+      <ul>
+       <li><strong>$L_1$ Lasso Penalty ($\lambda \|w\|_1$):</strong> Adds diamond-shaped norm constraint corners. Forces non-essential feature weights strictly to zero ($w_j = 0$), performing automatic <em>Feature Selection</em>!</li>
+       <li><strong>$L_2$ Ridge Penalty ($\lambda \|w\|_2^2$):</strong> Adds circular norm constraint. Shrinks weights close to zero, but never exactly zero (smooth weight decay).</li>
+      </ul>
+     </li>
+     <li><strong>⚠️ Data Leakage (The Silent Killer):</strong> Occurs when information from the test dataset leaks into model training. For example: calculating mean/standard deviation scaling parameters on the entire dataset <em>before</em> splitting into train/test sets! Always fit scalers on training set only.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Regularization Constraint Geometry Simulator 🚀</h2>
+   <p>Adjust penalty strength $\lambda$ to watch $L_1$ Lasso (diamond constraint) hit the axis corner at $w_1 = 0$ for sparse feature selection, while $L_2$ Ridge (circular constraint) shrinks weights smoothly toward zero!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Penalty Strength ($\lambda$):</span>
+      <span id="val-lambda" style="color: var(--primary-color); font-weight: 700;">1.0</span>
+     </div>
+     <input type="range" id="slider-lambda" min="0.1" max="5.0" step="0.1" value="1.0" oninput="updateReg()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D L1 Diamond (Lasso) vs L2 Circle (Ridge) Constraint Geometry</div>
+      <canvas id="reg-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="reg-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--success-border);">
+     λ = 1.0: L1 Lasso hits axis corner at w1 = 0! Feature 1 zeroed out (Sparse Model)!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Metric Selection & Regularization</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Scenario</th>
+       <th style="padding: 10px;">Primary Metric</th>
+       <th style="padding: 10px;">Regularization Choice</th>
+       <th style="padding: 10px;">Why</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>High Imbalance / False Negatives Fatal</strong> (e.g. Cancer Screening)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Recall (Sensitivity) / PR-AUC</td>
+       <td style="padding: 10px;">$L_2$ Ridge / Weight Decay</td>
+       <td style="padding: 10px;">Catch all positive cases; prevent single large feature dominance</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>High Imbalance / False Positives Costly</strong> (e.g. Spam / Account Blocking)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Precision / $F_{0.5}$-Score</td>
+       <td style="padding: 10px;">$L_2$ Ridge / Dropout</td>
+       <td style="padding: 10px;">Ensure high confidence when flagging a positive sample</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>High-Dimensional Collinear Features</strong> (e.g. 10,000 sparse text features)</td>
+       <td style="padding: 10px;">$F_1$-Score / ROC-AUC</td>
+       <td style="padding: 10px; color: var(--accent-teal);">$L_1$ Lasso / ElasticNet</td>
+       <td style="padding: 10px;">Eliminates noisy irrelevant features by driving weights to 0</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What is the unique mathematical characteristic of $L_1$ (Lasso) regularization compared to $L_2$ (Ridge)?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! L1 regularization drives irrelevant feature weights to exactly zero, resulting in a sparse, selected feature set.')">
+      A) It drives irrelevant feature weights to exactly zero, performing feature selection.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. L1 uses absolute values |w|.')">
+      B) It squares the weight values w^2.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. L1 reduces overfitting.')">
+      C) It increases model variance on test data.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0014-image-segmentation.html">&larr; Lesson 0014: Image Segmentation</a>
+   <a href="../lessons/0016-text-embeddings-nlp.html">Next Lesson 0016: NLP & Word Embeddings &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0015</p>
+ </footer>
+
+  <script>
+  const canvas2d = document.getElementById('reg-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let lambdaVal = 1.0;
+
+  function renderReg() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   const cx = 220;
+   const cy = 150;
+
+   // 1. Draw W1 & W2 Coordinate Axes
+   ctx2d.strokeStyle = '#94a3b8';
+   ctx2d.lineWidth = 1.5;
+   ctx2d.beginPath(); ctx2d.moveTo(20, cy); ctx2d.lineTo(440, cy); ctx2d.stroke();
+   ctx2d.beginPath(); ctx2d.moveTo(cx, 10); ctx2d.lineTo(cx, 290); ctx2d.stroke();
+
+   ctx2d.fillStyle = '#475569';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('w1 (Weight 1)', 445, cy + 4);
+   ctx2d.fillText('w2 (Weight 2)', cx - 45, 20);
+
+   // 2. Unconstrained MSE Loss Contours
+   const optX = cx + 130;
+   const optY = cy - 80;
+
+   ctx2d.strokeStyle = 'rgba(79, 70, 229, 0.35)';
+   ctx2d.lineWidth = 1.5;
+   for (let scale = 1; scale <= 4; scale++) {
+    ctx2d.beginPath();
+    ctx2d.ellipse(optX, optY, 25 * scale, 15 * scale, 0.4, 0, Math.PI * 2);
+    ctx2d.stroke();
+   }
+
+   // Unconstrained Minimum Dot
+   ctx2d.beginPath();
+   ctx2d.arc(optX, optY, 4, 0, Math.PI * 2);
+   ctx2d.fillStyle = '#4f46e5';
+   ctx2d.fill();
+   ctx2d.fillText('Unconstrained Minimum w*', optX + 8, optY - 6);
+
+   // 3. L1 Lasso Diamond Constraint (|w1| + |w2| <= R1)
+   const r1 = Math.max(15, 110 / lambdaVal);
+   ctx2d.strokeStyle = '#ef4444';
+   ctx2d.lineWidth = 2.5;
+   ctx2d.fillStyle = 'rgba(239, 68, 68, 0.08)';
+   ctx2d.beginPath();
+   ctx2d.moveTo(cx, cy - r1);
+   ctx2d.lineTo(cx + r1, cy);
+   ctx2d.lineTo(cx, cy + r1);
+   ctx2d.lineTo(cx - r1, cy);
+   ctx2d.closePath();
+   ctx2d.fill();
+   ctx2d.stroke();
+
+   // L1 Touch Point at Axis Corner (w1 = 0)
+   const l1TouchY = Math.max(cy - r1, cy - 80);
+   ctx2d.beginPath();
+   ctx2d.arc(cx, cy - r1, 6, 0, Math.PI * 2);
+   ctx2d.fillStyle = '#ef4444';
+   ctx2d.fill();
+   ctx2d.strokeStyle = '#ffffff';
+   ctx2d.lineWidth = 2;
+   ctx2d.stroke();
+
+   // 4. L2 Ridge Circle Constraint (w1^2 + w2^2 <= R2^2)
+   const r2 = Math.max(15, 95 / lambdaVal);
+   ctx2d.strokeStyle = '#3b82f6';
+   ctx2d.lineWidth = 2.5;
+   ctx2d.fillStyle = 'rgba(59, 130, 246, 0.08)';
+   ctx2d.beginPath();
+   ctx2d.arc(cx, cy, r2, 0, Math.PI * 2);
+   ctx2d.fill();
+   ctx2d.stroke();
+
+   // L2 Touch Point
+   const l2TouchX = cx + r2 * 0.7;
+   const l2TouchY = cy - r2 * 0.7;
+   ctx2d.beginPath();
+   ctx2d.arc(l2TouchX, l2TouchY, 6, 0, Math.PI * 2);
+   ctx2d.fillStyle = '#3b82f6';
+   ctx2d.fill();
+   ctx2d.strokeStyle = '#ffffff';
+   ctx2d.lineWidth = 2;
+   ctx2d.stroke();
+
+   // 5. Legend Panel on Right Side
+   const legX = 450;
+   ctx2d.fillStyle = '#ef4444';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('◆ L1 Lasso (Diamond)', legX, 100);
+   ctx2d.fillStyle = '#64748b';
+   ctx2d.font = '11px Inter, sans-serif';
+   ctx2d.fillText('Hits corner at w1 = 0!', legX, 118);
+   ctx2d.fillText('→ Feature Selection', legX, 134);
+
+   ctx2d.fillStyle = '#3b82f6';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('● L2 Ridge (Circle)', legX, 180);
+   ctx2d.fillStyle = '#64748b';
+   ctx2d.font = '11px Inter, sans-serif';
+   ctx2d.fillText('Hits smooth boundary w1 ≠ 0', legX, 198);
+   ctx2d.fillText('→ Smooth Weight Decay', legX, 214);
+
+   requestAnimationFrame(renderReg);
+  }
+
+  function updateReg() {
+   lambdaVal = parseFloat(document.getElementById('slider-lambda').value);
+   document.getElementById('val-lambda').innerText = lambdaVal.toFixed(1);
+   document.getElementById('reg-status').innerText = `λ = ${lambdaVal.toFixed(1)}: L1 Lasso hits axis corner at w1 = 0 (Sparse Model)! L2 Ridge shrinks weights smoothly!`;
+  }
+
+  updateReg();
+  renderReg();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

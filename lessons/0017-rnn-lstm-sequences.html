@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0017: Sequential Models, RNNs & LSTMs</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 8 • Lesson 17</span>
+  <h1>Sequential Models: RNNs & LSTMs ⌛</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Time-Series, Recurrent Loops, Vanishing Gradients & LSTM Memory Gates</span>
+   <span><a href="../lessons/0016-text-embeddings-nlp.html">&larr; Lesson 0016</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do Feedforward Networks Fail on Sequential Data? (Drawbacks of Input Independence)</h2>
+   <p>
+    Standard feedforward networks assume all inputs $x$ are completely independent. But for text (<em>"The movie was not..."</em>) or time-series stock prices, order matters!
+   </p>
+   <p>
+    <strong>Recurrent Neural Networks (RNNs)</strong> introduce a loop that passes a hidden memory state vector $h_{t-1}$ from step to step.
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Recurrent architectures specialize in sequential time-series and audio signal processing:</p>
+    <ul>
+     <li><strong>📈 Financial Time-Series Forecasting:</strong> Predicting stock price volatility and algorithmic trading signals based on sequential minute-by-minute order book data.</li>
+     <li><strong>🌤️ Weather & Energy Load Forecasting:</strong> Meteorological models tracking historical hourly temperature, humidity, and barometric pressure patterns.</li>
+     <li><strong>🏥 ICU Patient Health Monitoring:</strong> Tracking patient heart rate and oxygen saturation streams to predict cardiac arrest hours before symptoms appear.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Recurrent Memory Loops & LSTM Gated Highways)</h2>
+   \[ h_t = \tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h) \]
+
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ The Vanishing Gradient Failure Mode:</strong>
+    During Backpropagation Through Time (BPTT), gradients are multiplied by $W_{hh}$ over every time step. Over 50 time steps, $(0.9)^{50} &rarr; 0$! The network completely forgets early words in a sentence!
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Forget $f_t$, Input $i_t$, Output $o_t$ Gates & Cell State $c_t$ Update)</h2>
+   <p>
+    LSTMs solve vanishing gradients by adding an uninterrupted <strong>Cell State Memory Highway ($c_t$)</strong> controlled by 3 mathematical gates:
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The 3 LSTM Gates</div>
+    <ul>
+     <li><strong>Forget Gate ($f_t = \sigma(W_f [h_{t-1}, x_t] + b_f)$):</strong> Decides what details to erase from memory.</li>
+     <li><strong>Input Gate ($i_t = \sigma(W_i [h_{t-1}, x_t] + b_i)$):</strong> Decides what new information to write into memory.</li>
+     <li><strong>Output Gate ($o_t = \sigma(W_o [h_{t-1}, x_t] + b_o)$):</strong> Decides what part of memory to output as $h_t$.</li>
+    </ul>
+   </div>
+
+   <p>Updated Cell State: $c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t$.</p>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">⌛ Vanishing Gradients in BPTT & The Cell State Error Highway</div>
+    <ul>
+     <li><strong>Vanishing Gradients in BPTT:</strong> When backpropagating gradients back 50 time steps through vanilla RNNs, repeatedly multiplying weight matrix $W_{hh}$ shrinks gradients exponentially ($0.9^{50} \approx 0.005$). The network completely forgets early inputs!</li>
+     <li><strong>Cell State ($c_t$) as the Constant Error Highway:</strong> LSTMs solve this by introducing an <em>additive cell state highway</em>:</li>
+     \[ c_t = f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \]
+     Because operations are additive rather than purely multiplicative, gradients flow unchanged back through hundreds of time steps!
+     <li><strong>Bidirectional LSTMs (BiLSTM):</strong> Runs two separate hidden layers—one reading sequence forward ($1 \to T$) and one reading backward ($T \to 1$). Merging both hidden states provides complete past and future context!</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Sequential LSTM Memory Gate Simulator 🚀</h2>
+   <p>Scrub through sequence time steps $t=1 \dots 4$ to watch the Cell State memory highway ($c_t$) and hidden states ($h_t$) flow unimpeded across time steps!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Sequence Time Step ($t$):</span>
+      <span id="val-t" style="color: var(--primary-color); font-weight: 700;">t = 1</span>
+     </div>
+     <input type="range" id="slider-t" min="1" max="4" step="1" value="1" oninput="updateLSTM()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Cell State Memory Highway & Gated Recurrent Flow</div>
+      <canvas id="lstm-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="lstm-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--success-border);">
+     t = 1: Token "The" ingested. Cell state c1 initialized and passed forward!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Sequential Architectures</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Architecture</th>
+       <th style="padding: 10px;">Gate Complexity</th>
+       <th style="padding: 10px;">Max Sequence Memory</th>
+       <th style="padding: 10px;">Parallel Compute</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Vanilla RNN</strong></td>
+       <td style="padding: 10px;">None (Single $W_{hh}$)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Very Short (< 10 steps)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Sequential ($O(T)$)</td>
+       <td style="padding: 10px;">Toy sequential problems only (Obsolete in production)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>LSTM</strong></td>
+       <td style="padding: 10px;">3 Gates (Forget, Input, Output)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Long (100-500 steps)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Sequential ($O(T)$)</td>
+       <td style="padding: 10px;">Time-series sensor forecasting, financial order books, lightweight audio</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>GRU (Gated Recurrent Unit)</strong></td>
+       <td style="padding: 10px;">2 Gates (Reset, Update)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Long (100-500 steps)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Sequential ($O(T)$)</td>
+       <td style="padding: 10px;">Faster training alternative to LSTM with slightly fewer parameters</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Transformer</strong></td>
+       <td style="padding: 10px;">Self-Attention ($Q, K, V$)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Massive (128,000+ tokens)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fully Parallel ($O(1)$)</td>
+       <td style="padding: 10px;">Large Language Models, Machine Translation, modern NLP</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What is the primary role of the Cell State ($c_t$) highway in an LSTM network?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! The cell state highway lets gradients flow across long time steps without being repeatedly multiplied by weights.')">
+      A) It serves as a linear memory highway that allows long-term information and gradients to flow without vanishing.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. LSTMs process sequential order.')">
+      B) It flattens time-series data into 2D image pixels.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Forget gates perform erasure.')">
+      C) It forces the network to erase all prior context at every step.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0016-text-embeddings-nlp.html">&larr; Lesson 0016: NLP & Word Embeddings</a>
+   <a href="../lessons/0018-transformers-attention.html">Next Lesson 0018: Transformers & Attention &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0017</p>
+ </footer>
+
+  <script>
+  const canvas2d = document.getElementById('lstm-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let timeStep = 1;
+
+  const sequence = [
+   { t: 1, token: 'The', cVal: 'c1 = +0.82', hVal: 'h1 = +0.45' },
+   { t: 2, token: 'movie', cVal: 'c2 = +0.88', hVal: 'h2 = +0.62' },
+   { t: 3, token: 'was', cVal: 'c3 = +0.85', hVal: 'h3 = +0.58' },
+   { t: 4, token: 'awesome', cVal: 'c4 = +0.96', hVal: 'h4 = +0.91' }
+  ];
+
+  function renderLSTM() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   // 1. Draw Top Cell State Memory Highway (Constant Gradient Flow)
+   const highwayY = 60;
+   ctx2d.strokeStyle = '#10b981';
+   ctx2d.lineWidth = 4;
+   ctx2d.beginPath();
+   ctx2d.moveTo(40, highwayY);
+   ctx2d.lineTo(560, highwayY);
+   ctx2d.stroke();
+
+   ctx2d.fillStyle = '#047857';
+   ctx2d.font = 'bold 11px Inter, sans-serif';
+   ctx2d.fillText('Cell State Highway c_t (Constant Error Flow)', 40, highwayY - 12);
+
+   // 2. Draw 4 Sequence Steps
+   for (let i = 0; i < 4; i++) {
+    const item = sequence[i];
+    const px = 85 + i * 140;
+    const py = 160;
+    const isAct = item.t === timeStep;
+    const isPast = item.t <= timeStep;
+
+    // Line connecting Cell State Highway to LSTM Cell
+    ctx2d.strokeStyle = isPast ? '#10b981' : '#cbd5e1';
+    ctx2d.lineWidth = 2.5;
+    ctx2d.beginPath();
+    ctx2d.moveTo(px, highwayY);
+    ctx2d.lineTo(px, py - 35);
+    ctx2d.stroke();
+
+    // LSTM Cell Block
+    ctx2d.fillStyle = isAct ? '#4f46e5' : (isPast ? '#e0e7ff' : '#f8fafc');
+    ctx2d.fillRect(px - 45, py - 35, 90, 70);
+    ctx2d.strokeStyle = isAct ? '#4338ca' : (isPast ? '#6366f1' : '#cbd5e1');
+    ctx2d.lineWidth = isAct ? 3 : 1.5;
+    ctx2d.strokeRect(px - 45, py - 35, 90, 70);
+
+    // Cell Label & Gate Status
+    ctx2d.fillStyle = isAct ? '#ffffff' : '#1e293b';
+    ctx2d.font = 'bold 12px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(`LSTM t=${item.t}`, px, py - 12);
+
+    ctx2d.fillStyle = isAct ? '#e0e7ff' : '#64748b';
+    ctx2d.font = '10px Inter, sans-serif';
+    ctx2d.fillText(`f_t = 0.95`, px, py + 6);
+    ctx2d.fillText(item.cVal, px, py + 22);
+
+    // Bottom Input Token x_t
+    ctx2d.fillStyle = '#0f172a';
+    ctx2d.font = 'bold 12px Inter, sans-serif';
+    ctx2d.fillText(`x${item.t}: "${item.token}"`, px, py + 65);
+
+    ctx2d.strokeStyle = '#94a3b8';
+    ctx2d.lineWidth = 1.5;
+    ctx2d.beginPath();
+    ctx2d.moveTo(px, py + 35);
+    ctx2d.lineTo(px, py + 50);
+    ctx2d.stroke();
+
+    // Horizontal Recurrent Hidden State h_t Arrow to next step
+    if (i < 3) {
+     ctx2d.strokeStyle = item.t < timeStep ? '#6366f1' : '#cbd5e1';
+     ctx2d.lineWidth = 2.5;
+     ctx2d.beginPath();
+     ctx2d.moveTo(px + 45, py);
+     ctx2d.lineTo(px + 95, py);
+     ctx2d.stroke();
+    }
+   }
+   ctx2d.textAlign = 'left';
+
+   requestAnimationFrame(renderLSTM);
+  }
+
+  function updateLSTM() {
+   timeStep = parseInt(document.getElementById('slider-t').value);
+   document.getElementById('val-t').innerText = 't = ' + timeStep;
+   const cur = sequence[timeStep - 1];
+   document.getElementById('lstm-status').innerText = `Step t=${timeStep} (Token "${cur.token}"): Forget gate f_t=0.95. Cell memory state ${cur.cVal} preserved!`;
+  }
+
+  updateLSTM();
+  renderLSTM();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

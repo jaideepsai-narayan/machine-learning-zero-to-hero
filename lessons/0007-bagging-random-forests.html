@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0007: Bagging & Random Forests</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 3 • Lesson 7</span>
+  <h1>Bagging & Random Forests 🌲🌲🌲</h1>
+  <div class="meta">
+   <span>Level: Beginner</span>
+   <span>Topic: Bootstrap Aggregating, Feature Subsampling & Variance Reduction</span>
+   <span><a href="../lessons/0006-decision-trees.html">&larr; Lesson 0006</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Random Forests? (Drawbacks of Deep Decision Tree Overfitting)</h2>
+   <p>
+    If you have a rare medical symptom, would you trust the opinion of a single doctor who might have a personal bias, or an ensemble of <strong>100 diverse doctors voting together</strong>?
+   </p>
+   <p>
+    A single Decision Tree often overfits noise in training data (High Variance). <strong>Ensemble Learning</strong> combines many trees to build a super-model that is far more accurate than any single tree!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Random Forests are the gold standard baseline model for tabular business data:</p>
+    <ul>
+     <li><strong>🛍️ E-Commerce Recommendation & Churn:</strong> Retailers use Random Forests to rank customer purchase probability because they handle missing user demographics seamlessly.</li>
+     <li><strong>🏡 Real Estate Valuation:</strong> Estimating property values across thousands of heterogeneous neighborhood features.</li>
+     <li><strong>🏥 Medical Diagnosis Systems:</strong> Aggregating predictions across hundreds of trees prevents individual doctor bias and delivers robust clinical risk scores.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Wisdom of Crowds: Bootstrapping & Feature Subsampling)</h2>
+   <p>Bagging works in two simple steps:</p>
+
+   <div class="callout green">
+    <div class="callout-title">Step 1: Bootstrapping (Random Row Sampling)</div>
+    Create $B$ different training datasets by randomly picking rows from the original data <strong>with replacement</strong> (some rows repeat, some are left out).
+   </div>
+
+   <div class="callout green">
+    <div class="callout-title">Step 2: Aggregating (Majority Vote or Average)</div>
+    Train $B$ trees independently in parallel on those datasets.
+    <br>• For Classification: Take the <strong>Majority Vote</strong>.
+    <br>• For Regression: Take the <strong>Average Prediction</strong>.
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Variance Reduction Math $\text{Var} \to \frac{\sigma^2}{B}$ & Majority Voting)</h2>
+   <p>
+    If one feature is super strong (e.g., "Income" for predicting credit risk), <em>every</em> bootstrapped tree will put "Income" at the root split. The trees will all be identical and correlated!
+   </p>
+
+   <div class="callout pink">
+    <div class="callout-title">Random Forest Feature Subsampling</div>
+    At <strong>every split in every tree</strong>, the Random Forest considers only a random subset of $m$ features (typically $m = \sqrt{M}$ total features).
+   </div>
+
+   <h3>Variance Reduction Math:</h3>
+   <p>If $B$ trees have variance $\sigma^2$ and correlation $\rho$, the total variance of the ensemble prediction is:</p>
+   \[ \text{Variance}_{\text{Ensemble}} = \rho \sigma^2 + \frac{1 - \rho}{B} \sigma^2 \]
+   <p>By forcing trees to use random feature subsets, we drive correlation $\rho &rarr; 0$, causing variance to drop toward $\frac{\sigma^2}{B}$!</p>
+  
+   <div class="callout blue" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎁 Out-of-Bag (OOB) Error & Feature Importance</div>
+    <ul>
+     <li><strong>Out-of-Bag (OOB) Free Validation:</strong> When drawing bootstrap samples with replacement, mathematically $\approx 36.8\%$ of data points are left out of each tree:</li>
+     \[ \lim_{N \to \infty} \left( 1 - \frac{1}{N} 
+ight)^N = \frac{1}{e} \approx 0.368 \]
+     These left-out "OOB samples" act as a built-in validation set! You get free model evaluation without holding out test data.
+     <li><strong>Feature Importance (MDI):</strong> Random Forests calculate feature importance by tracking how much each feature reduces Gini Impurity across all trees in the forest.</li>
+     <li><strong>Random Feature Subsampling ( = \sqrt{P}$):</strong> If one dominant feature exists, every tree would split on it first! Sampling only $\sqrt{P}$ features per split forces trees to look at different attributes, decorrelating the ensemble.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Random Forest Ensemble Simulator 🚀</h2>
+   <p>Adjust the Tree Count slider ($B = 1 \dots 50$) to watch noisy, high-variance single-tree boundaries average into a smooth, highly stable ensemble decision boundary!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Number of Trees in Forest ($B$):</span>
+      <span id="val-b" style="color: var(--primary-color); font-weight: 700;">10</span>
+     </div>
+     <input type="range" id="slider-b" min="1" max="50" step="1" value="10" oninput="updateForest()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Ensemble Decision Boundary & Smooth Heatmap</div>
+      <canvas id="rf-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="rf-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--success-border);">
+     B = 10 Trees: Variance reduced by 90%! High stability achieved!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Single Tree vs. Bagging vs. Random Forests</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Algorithm</th>
+       <th style="padding: 10px;">Bias / Variance</th>
+       <th style="padding: 10px;">Parallel Training</th>
+       <th style="padding: 10px;">Validation Mechanism</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Single Decision Tree</strong></td>
+       <td style="padding: 10px;">Low Bias / High Variance</td>
+       <td style="padding: 10px;">N/A</td>
+       <td style="padding: 10px;">Requires Train-Test Split</td>
+       <td style="padding: 10px;">When maximum visual rule interpretability is required</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Bagged Trees</strong></td>
+       <td style="padding: 10px;">Low Bias / Reduced Variance</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Yes (Fully Parallel)</td>
+       <td style="padding: 10px;">OOB Score available</td>
+       <td style="padding: 10px;">Ensembling unstable base estimators</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Random Forest</strong></td>
+       <td style="padding: 10px;">Low Bias / Lowest Variance</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Yes (Fully Parallel)</td>
+       <td style="padding: 10px;">OOB Score + Feature Importance</td>
+       <td style="padding: 10px;">Default go-to model for structured tabular data</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What is the primary benefit of Random Forests selecting a random subset of features ($\sqrt{M}$) at each node split?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Feature subsampling decorrelates trees, preventing dominant features from making all trees identical.')">
+      A) It decorrelates the trees, reducing total variance and preventing overfitting.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Feature subsampling is designed to reduce variance.')">
+      B) It forces every tree to produce identical predictions.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Decision trees do not require gradient descent.')">
+      C) It accelerates gradient descent convergence rates.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0006-decision-trees.html">&larr; Lesson 0006: Decision Trees</a>
+   <a href="../lessons/0008-boosting-adaboost-xgboost.html">Next Lesson 0008: Boosting Algorithms &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0007</p>
+ </footer>
+
+ <script>
+  const canvas2d = document.getElementById('rf-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let treeCount = 10;
+
+  const dataPoints = [
+   { x: 100, y: 70, cls: 'red' }, { x: 150, y: 120, cls: 'red' }, { x: 120, y: 220, cls: 'red' },
+   { x: 220, y: 90, cls: 'red' }, { x: 260, y: 240, cls: 'red' }, { x: 180, y: 160, cls: 'red' },
+   { x: 480, y: 220, cls: 'blue' }, { x: 500, y: 130, cls: 'blue' }, { x: 420, y: 250, cls: 'blue' },
+   { x: 350, y: 190, cls: 'blue' }, { x: 520, y: 70, cls: 'blue' }, { x: 440, y: 100, cls: 'blue' }
+  ];
+
+  function getEnsembleProb(x, y, numTrees) {
+   let sum = 0;
+   for (let t = 0; t < numTrees; t++) {
+    const noise = Math.sin(t * 2.3 + x * 0.4) * 0.4 + Math.cos(t * 1.1 + y * 0.3) * 0.2;
+    const dist = Math.sqrt(x * x + y * y);
+    sum += (dist + noise < 3.2) ? 1 : 0;
+   }
+   return sum / numTrees;
+  }
+
+  function renderForest() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   // Render 2D Ensemble Probability Heatmap Grid
+   const step = 6;
+   for (let px = 0; px < canvas2d.width; px += step) {
+    for (let py = 0; py < canvas2d.height; py += step) {
+     const gx = (px - 300) / 60;
+     const gy = (py - 150) / 60;
+     const prob = getEnsembleProb(gx, gy, treeCount);
+
+     // Interpolate between Red (#fee2e2) and Blue (#dbeafe)
+     const r = Math.round(254 * (1 - prob) + 219 * prob);
+     const g = Math.round(226 * (1 - prob) + 234 * prob);
+     const b = Math.round(226 * (1 - prob) + 254 * prob);
+
+     ctx2d.fillStyle = `rgb(${r}, ${g}, ${b})`;
+     ctx2d.fillRect(px, py, step, step);
+    }
+   }
+
+   // Draw Data Samples
+   dataPoints.forEach(pt => {
+    ctx2d.beginPath();
+    ctx2d.arc(pt.x, pt.y, 7, 0, Math.PI * 2);
+    ctx2d.fillStyle = pt.cls === 'red' ? '#ef4444' : '#3b82f6';
+    ctx2d.fill();
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 2;
+    ctx2d.stroke();
+   });
+
+   requestAnimationFrame(renderForest);
+  }
+
+  function updateForest() {
+   treeCount = parseInt(document.getElementById('slider-b').value);
+   document.getElementById('val-b').innerText = treeCount;
+   const varReduce = Math.round(100 * (1 - 1 / treeCount));
+   document.getElementById('rf-status').innerText = `B = ${treeCount} Trees: Ensemble variance reduced by ${varReduce}%! High stability achieved!`;
+  }
+
+  updateForest();
+  renderForest();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

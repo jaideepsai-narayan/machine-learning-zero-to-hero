@@ -1,0 +1,10 @@
+# Python cache & temporary files
+__pycache__/
+*.pyc
+*.pyo
+
+# System & Editor files
+.DS_Store
+.vscode/
+.idea/
+*.log

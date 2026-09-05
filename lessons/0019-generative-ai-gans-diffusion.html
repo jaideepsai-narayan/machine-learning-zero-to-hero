@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0019: Generative AI (GANs, VAEs & Diffusion Models)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 9 • Lesson 19</span>
+  <h1>Generative AI: GANs & Diffusion Models 🎨</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Generative vs Discriminative, GAN Minimax Game, Latent Space & Diffusion</span>
+   <span><a href="../lessons/0018-transformers-attention.html">&larr; Lesson 0018</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Move Beyond Discriminative Models? (Drawbacks of Only Predicting Labels $P(y|x)$)</h2>
+   <ul>
+    <li><strong>Discriminative AI:</strong> Learns $P(y|x)$ to draw boundaries between categories (e.g. <em>"Is this a cat or a dog?"</em>).</li>
+    <li><strong>Generative AI:</strong> Learns the underlying data distribution $P(x)$ to create <strong>brand-new synthetic data</strong> from scratch!</li>
+   </ul>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Generative AI moves from predicting labels $P(y|x)$ to creating brand new content $P(x)$:</p>
+    <ul>
+     <li><strong>🎨 Text-to-Image Generation (Midjourney / Stable Diffusion):</strong> Generating high-resolution digital art, marketing imagery, and photorealistic concept designs from text prompts.</li>
+     <li><strong>💊 Drug Discovery & Molecular Design:</strong> Generative AI designs novel protein structures and drug candidate molecules in latent chemical spaces.</li>
+     <li><strong>🧪 Synthetic Data Generation:</strong> Generating privacy-compliant synthetic medical patient data or rare autonomous driving corner-case simulation frames.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Generative Modeling $P(x)$ with GANs, VAEs, and Diffusion)</h2>
+   <p>
+    Pioneered by Ian Goodfellow (2014), a GAN consists of two neural networks locked in a game of cat-and-mouse:
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The Counterfeiter vs Cop Game</div>
+    <ul>
+     <li><strong>Generator $G(z)$:</strong> The Counterfeiter. Takes random noise $z$ and tries to produce fake images realistic enough to trick the cop.</li>
+     <li><strong>Discriminator $D(x)$:</strong> The Cop. Takes real images and fake generated images and tries to classify them as 1 (Real) or 0 (Fake).</li>
+    </ul>
+   </div>
+
+   <h3>The GAN Minimax Objective Function:</h3>
+   \[ \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}} [\log D(x)] + \mathbb{E}_{z \sim p_z} [\log (1 - D(G(z)))] \]
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (GAN Minimax Counterfeiter vs Cop Game & Diffusion Denoising U-Net)</h2>
+   <p>
+    Why have Diffusion Models surpassed GANs in image quality?
+   </p>
+   <ol>
+    <li><strong>Forward Process (Noise Addition):</strong> Slowly add Gaussian noise to a clean image over $T=1000$ steps until it becomes pure static noise.</li>
+    <li><strong>Reverse Process (Denoising):</strong> Train a U-Net neural network to predict and remove noise step-by-step, transforming pure static back into a crystal-clear image!</li>
+   </ol>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎨 Mode Collapse in GANs & Classifier-Free Guidance (CFG)</div>
+    <ul>
+     <li><strong>Mode Collapse in GANs:</strong> The generator discovers a single realistic image output (e.g., one specific dog face) that consistently fools the discriminator, and repeatedly generates only that dog—losing all dataset diversity! Wasserstein GANs (WGAN) and Diffusion models eliminate mode collapse.</li>
+     <li><strong>Classifier-Free Guidance (CFG) in Diffusion:</strong> Controls how strictly a Diffusion model adheres to a user's text prompt. It interpolates between unconditional noise predictions $\mathbf{\epsilon}_{u}$ and text-conditioned predictions $\mathbf{\epsilon}_{c}$:</li>
+     \[ \mathbf{\epsilon}_{\text{guided}} = \mathbf{\epsilon}_{u} + w \cdot \left( \mathbf{\epsilon}_{c} - \mathbf{\epsilon}_{u} \right) \]
+     Higher scale $w \in [7, 12]$ forces strict prompt alignment, while lower $w$ increases creative diversity!
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Latent Space & Diffusion Denoising Visualizer 🎨</h2>
+   <p>Switch between <strong>GAN Minimax Battle</strong>, <strong>VAE Latent Space Interpolation</strong>, and <strong>Diffusion Reverse Denoising</strong>. Adjust parameters to see real-time synthesis and 3D manifold exploration!</p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="btn btn-primary no-math" onclick="toggleViewMode()">📊 Toggle View: 2D Synthesized Output / 3D Latent Surface</button>
+    </div>
+    <!-- Mode selection -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; justify-content: center;">
+     <button id="btn-mode-gan" class="quiz-option correct" onclick="setGenMode('gan')">⚔️ GAN Minimax Battle</button>
+     <button id="btn-mode-vae" class="quiz-option" onclick="setGenMode('vae')">🌀 VAE Latent Interpolation</button>
+     <button id="btn-mode-diff" class="quiz-option" onclick="setGenMode('diff')">🌫️ Diffusion Denoising</button>
+    </div>
+
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; justify-content: center; background: #f8fafc; padding: 0.8rem; border-radius: 8px;">
+     <!-- Controls dependent on mode -->
+     <div id="controls-gan" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+      <button class="btn btn-primary" onclick="stepGAN()">⚔️ Train GAN Epoch (<span id="gan-epoch-num">0</span>)</button>
+      <button class="quiz-option" style="border: 1px solid #cbd5e1;" onclick="resetGAN()">🔄 Reset GAN</button>
+     </div>
+
+     <div id="controls-vae" style="display: none; gap: 1rem; flex-wrap: wrap; align-items: center;">
+      <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">
+       Latent $z_1$ (Smile): <input type="range" id="slider-z1" min="-2" max="2" step="0.1" value="0" oninput="updateGen()"> <span id="val-z1">0.0</span>
+      </label>
+      <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">
+       Latent $z_2$ (Rotation): <input type="range" id="slider-z2" min="-2" max="2" step="0.1" value="0" oninput="updateGen()"> <span id="val-z2">0.0</span>
+      </label>
+     </div>
+
+     <div id="controls-diff" style="display: none; gap: 1rem; flex-wrap: wrap; align-items: center;">
+      <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">
+       Diffusion Step $t$ (Denoising): <input type="range" id="slider-t" min="0" max="100" step="1" value="100" oninput="updateGen()"> <span id="val-t">t=100 (Noise)</span>
+      </label>
+      <button class="quiz-option" style="background: #0284c7; color: white; border: none; font-weight: 700;" onclick="playDiffusionAnimation()">▶️ Auto Denoise</button>
+     </div>
+    </div>
+
+    <div class="canvas-stack">
+     <div class="visual-canvas-box">
+      <div id="canvas-2d-title" style="font-weight: 700; color: #475569; margin-bottom: 0.5rem;">2D Generated Synthesized Output</div>
+      <canvas id="gen-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     <div class="visual-canvas-box">
+      <div class="canvas-header">🌐 3D Latent Manifold / Loss Surface (Drag to Rotate)</div>
+      <canvas id="gen-3d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+    </div>
+
+    <div id="gen-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.8rem; color: var(--accent-pink);">
+     GAN Epoch 0: Generator produces raw noise. Discriminator correctly flags 100% fake.
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Generative Model Paradigms</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Paradigm</th>
+       <th style="padding: 10px;">Generation Quality</th>
+       <th style="padding: 10px;">Training Stability</th>
+       <th style="padding: 10px;">Sampling Speed</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Variational Autoencoders (VAEs)</strong></td>
+       <td style="padding: 10px;">Moderate (Tend to be slightly blurry)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">High (Stable ELBO loss)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fast 1-step decoder forward pass</td>
+       <td style="padding: 10px;">Smooth latent space interpolation, fast generation, feature representation learning</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Generative Adversarial Networks (GANs)</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">High (Sharp crisp details)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Unstable (Minimax mode collapse risk)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fast 1-step generator pass</td>
+       <td style="padding: 10px;">Real-time video synthesis, fast image-to-image translation, deepfake detectors</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Diffusion Models (DDPM / Latent)</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">State-of-the-Art (Highest detail)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">High (Stable U-Net MSE score loss)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Slow (Iterative 20-50 denoising steps)</td>
+       <td style="padding: 10px;">Highest-quality text-to-image synthesis (Midjourney, Stable Diffusion), audio synthesis</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     How do Diffusion Models generate high-resolution images from scratch?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Diffusion models start with pure Gaussian noise and iteratively predict and remove noise step-by-step.')">
+      A) By starting with pure Gaussian noise and iteratively predicting and removing noise step-by-step.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Diffusion models do not use decision tree bagging.')">
+      B) By averaging decision tree bagging thresholds.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Diffusion models work via iterative denoising.')">
+      C) By solving linear regression MSE loss.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0018-transformers-attention.html">&larr; Lesson 0018: Transformers & Attention</a>
+   <a href="../index.html">Master Course Hub &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0019</p>
+ </footer>
+
+ <script>
+  const canvas2d = document.getElementById('gen-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  const canvas3d = document.getElementById('gen-3d');
+  const ctx3d = canvas3d.getContext('2d');
+
+  let currentMode = 'gan'; // 'gan', 'vae', 'diff'
+  let ganEpoch = 0;
+
+  let angleX = 0.4;
+  let angleY = 0.5;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+  let animId = null;
+
+  canvas3d.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas3d.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas3d.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   const dx = e.clientX - prevMouseX;
+   const dy = e.clientY - prevMouseY;
+   angleY += dx * 0.01;
+   angleX += dy * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   render3D();
+  });
+
+  function setGenMode(mode) {
+   currentMode = mode;
+   document.getElementById('btn-mode-gan').className = mode === 'gan' ? 'quiz-option correct' : 'quiz-option';
+   document.getElementById('btn-mode-vae').className = mode === 'vae' ? 'quiz-option correct' : 'quiz-option';
+   document.getElementById('btn-mode-diff').className = mode === 'diff' ? 'quiz-option correct' : 'quiz-option';
+
+   document.getElementById('controls-gan').style.display = mode === 'gan' ? 'flex' : 'none';
+   document.getElementById('controls-vae').style.display = mode === 'vae' ? 'flex' : 'none';
+   document.getElementById('controls-diff').style.display = mode === 'diff' ? 'flex' : 'none';
+
+   updateGen();
+  }
+
+  function stepGAN() {
+   ganEpoch++;
+   document.getElementById('gan-epoch-num').innerText = ganEpoch;
+   updateGen();
+  }
+
+  function resetGAN() {
+   ganEpoch = 0;
+   document.getElementById('gan-epoch-num').innerText = 0;
+   updateGen();
+  }
+
+  let diffAnimTimer = null;
+  function playDiffusionAnimation() {
+   if (diffAnimTimer) clearInterval(diffAnimTimer);
+   const slider = document.getElementById('slider-t');
+   slider.value = 100;
+   updateGen();
+   diffAnimTimer = setInterval(() => {
+    let val = parseInt(slider.value, 10);
+    if (val > 0) {
+     slider.value = val - 2;
+     updateGen();
+    } else {
+     clearInterval(diffAnimTimer);
+    }
+   }, 50);
+  }
+
+  function updateGen() {
+   const z1 = parseFloat(document.getElementById('slider-z1').value);
+   const z2 = parseFloat(document.getElementById('slider-z2').value);
+   const tStep = parseInt(document.getElementById('slider-t').value, 10);
+
+   document.getElementById('val-z1').innerText = z1.toFixed(1);
+   document.getElementById('val-z2').innerText = z2.toFixed(1);
+   document.getElementById('val-t').innerText = tStep === 0 ? 't=0 (Clean Data)' : `t=${tStep} (${tStep}% Noise)`;
+
+   const statusEl = document.getElementById('gen-status');
+   if (currentMode === 'gan') {
+    document.getElementById('canvas-2d-title').innerText = "2D GAN Generator Image Quality";
+    if (ganEpoch === 0) {
+     statusEl.innerText = "Epoch 0: Generator outputs static noise. Discriminator score D(G(z))=0.02 (100% Fake).";
+    } else if (ganEpoch === 1) {
+     statusEl.innerText = "Epoch 1: Generator learns basic colors & outlines. Discriminator score D(G(z))=0.35.";
+    } else if (ganEpoch === 2) {
+     statusEl.innerText = "Epoch 2: Generator produces plausible features. Discriminator score D(G(z))=0.48 (Fooled!).";
+    } else {
+     statusEl.innerText = `Epoch ${ganEpoch}: Nash Equilibrium achieved! Generator produces photorealistic samples; Discriminator accuracy = 50%.`;
+    }
+   } else if (currentMode === 'vae') {
+    document.getElementById('canvas-2d-title').innerText = "2D VAE Latent Manifold Morphing";
+    statusEl.innerText = `Interpolating Latent Space: z1=${z1.toFixed(1)} (Smile), z2=${z2.toFixed(1)} (Rotation). Smooth continuous manifold!`;
+   } else if (currentMode === 'diff') {
+    document.getElementById('canvas-2d-title').innerText = "2D Reverse Denoising Diffusion Process";
+    if (tStep > 80) {
+     statusEl.innerText = `Diffusion Step t=${tStep}: Pure isotropic Gaussian static noise x_T ~ N(0, I).`;
+    } else if (tStep > 30) {
+     statusEl.innerText = `Diffusion Step t=${tStep}: U-Net predicts score function ∇_x log p(x). Coarse structure emerging.`;
+    } else if (tStep > 0) {
+     statusEl.innerText = `Diffusion Step t=${tStep}: High-frequency details and fine textures restored!`;
+    } else {
+     statusEl.innerText = `Diffusion Step t=0: Synthesis complete! Crystal-clear generated data sample.`;
+    }
+   }
+
+   render2D();
+   render3D();
+  }
+
+  function render2D() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   const w = canvas2d.width;
+   const h = canvas2d.height;
+
+   // Draw background frame
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, w, h);
+
+   if (currentMode === 'gan') {
+    // GAN image generation based on epoch
+    const quality = Math.min(1.0, ganEpoch * 0.4);
+    const imgW = 140, imgH = 140;
+    const startX = (w - imgW) / 2, startY = (h - imgH) / 2;
+
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.fillRect(startX, startY, imgW, imgH);
+
+    // Draw dynamic avatar based on quality
+    const centerX = w / 2;
+    const centerY = h / 2;
+
+    if (quality < 0.2) {
+     // Pure noise
+     const imgData = ctx2d.createImageData(imgW, imgH);
+     for (let i = 0; i < imgData.data.length; i += 4) {
+      const v = Math.random() * 255;
+      imgData.data[i] = v;
+      imgData.data[i+1] = v;
+      imgData.data[i+2] = v;
+      imgData.data[i+3] = 255;
+     }
+     ctx2d.putImageData(imgData, startX, startY);
+    } else {
+     // Draw face with noise overlay depending on quality
+     ctx2d.fillStyle = '#fde047';
+     ctx2d.beginPath();
+     ctx2d.arc(centerX, centerY, 45, 0, Math.PI * 2);
+     ctx2d.fill();
+
+     // Eyes
+     ctx2d.fillStyle = '#ffffff';
+     ctx2d.beginPath();
+     ctx2d.arc(centerX - 16, centerY - 12, 6, 0, Math.PI * 2);
+     ctx2d.arc(centerX + 16, centerY - 12, 6, 0, Math.PI * 2);
+     ctx2d.fill();
+
+     // Mouth
+     ctx2d.strokeStyle = '#0f172a';
+     ctx2d.lineWidth = 4;
+     ctx2d.beginPath();
+     ctx2d.arc(centerX, centerY + 8, 22, 0.1 * Math.PI, 0.9 * Math.PI);
+     ctx2d.stroke();
+
+     // Add noise overlay if quality < 1
+     if (quality < 0.9) {
+      ctx2d.fillStyle = 'rgba(15, 23, 42, ' + (1 - quality) + ')';
+      for (let i = 0; i < 150 * (1 - quality); i++) {
+       const rx = startX + Math.random() * imgW;
+       const ry = startY + Math.random() * imgH;
+       ctx2d.fillRect(rx, ry, 4, 4);
+      }
+     }
+    }
+
+    // Title tag
+    ctx2d.fillStyle = '#1e293b'; ctx2d.font = 'bold 12px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(`GAN Generator output (Epoch ${ganEpoch})`, w / 2, h - 12);
+
+   } else if (currentMode === 'vae') {
+    const z1 = parseFloat(document.getElementById('slider-z1').value);
+    const z2 = parseFloat(document.getElementById('slider-z2').value);
+
+    const centerX = w / 2;
+    const centerY = h / 2;
+
+    ctx2d.save();
+    ctx2d.translate(centerX, centerY);
+    ctx2d.rotate(z2 * 0.4);
+
+    // VAE Face morphing
+    ctx2d.fillStyle = z1 > 0 ? '#38bdf8' : '#a855f7';
+    ctx2d.beginPath();
+    ctx2d.arc(0, 0, 50, 0, Math.PI * 2);
+    ctx2d.fill();
+
+    // Eyes
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.beginPath();
+    ctx2d.arc(-18, -12, 8, 0, Math.PI * 2);
+    ctx2d.arc(18, -12, 8, 0, Math.PI * 2);
+    ctx2d.fill();
+
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.beginPath();
+    ctx2d.arc(-18 + z1 * 2, -12, 4, 0, Math.PI * 2);
+    ctx2d.arc(18 + z1 * 2, -12, 4, 0, Math.PI * 2);
+    ctx2d.fill();
+
+    // Mouth curvature controlled by z1
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 5;
+    ctx2d.beginPath();
+    const smileCurve = 0.2 + z1 * 0.25;
+    if (smileCurve >= 0) {
+     ctx2d.arc(0, 5, 20, 0, Math.PI);
+    } else {
+     ctx2d.arc(0, 25, 20, Math.PI, 0);
+    }
+    ctx2d.stroke();
+
+    ctx2d.restore();
+
+    ctx2d.fillStyle = '#e2e8f0';
+    ctx2d.font = 'bold 12px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(`VAE Latent Vector z = [${z1.toFixed(1)}, ${z2.toFixed(1)}]`, w / 2, h - 12);
+
+   } else if (currentMode === 'diff') {
+    const tStep = parseInt(document.getElementById('slider-t').value, 10);
+    const noiseRatio = tStep / 100.0;
+
+    const centerX = w / 2;
+    const centerY = h / 2;
+
+    // Clean target image
+    ctx2d.fillStyle = '#ec4899';
+    ctx2d.beginPath();
+    ctx2d.arc(centerX, centerY, 55, 0, Math.PI * 2);
+    ctx2d.fill();
+
+    // Draw star inside
+    ctx2d.fillStyle = '#fef08a';
+    ctx2d.beginPath();
+    ctx2d.arc(centerX, centerY, 25, 0, Math.PI * 2);
+    ctx2d.fill();
+
+    // Noise mask
+    if (noiseRatio > 0) {
+     const imgData = ctx2d.getImageData(0, 0, w, h);
+     const data = imgData.data;
+     for (let i = 0; i < data.length; i += 4) {
+      if (Math.random() < noiseRatio) {
+       const noiseVal = Math.random() * 255;
+       const alpha = noiseRatio;
+       data[i] = data[i] * (1 - alpha) + noiseVal * alpha;
+       data[i+1] = data[i+1] * (1 - alpha) + noiseVal * alpha;
+       data[i+2] = data[i+2] * (1 - alpha) + noiseVal * alpha;
+      }
+     }
+     ctx2d.putImageData(imgData, 0, 0);
+    }
+
+    ctx2d.fillStyle = '#1e293b'; ctx2d.font = 'bold 12px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.fillText(`Reverse Diffusion step t = ${tStep}`, w / 2, h - 12);
+   }
+  }
+
+  function render3D() {
+   ctx3d.clearRect(0, 0, canvas3d.width, canvas3d.height);
+   const w = canvas3d.width;
+   const h = canvas3d.height;
+   const cx = w / 2;
+   const cy = h / 2;
+
+   ctx3d.fillStyle = '#ffffff';
+   ctx3d.fillRect(0, 0, w, h);
+
+   function project(x, y, z) {
+    let x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+    let z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+
+    let y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+    let z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+    const scale = 220 / (220 + z2);
+    return {
+     px: cx + x1 * scale,
+     py: cy + y2 * scale,
+     scale: scale,
+     z: z2
+    };
+   }
+
+   // Draw 3D surface or latent distribution
+   const gridSize = 12;
+   const spacing = 12;
+
+   for (let i = -gridSize; i <= gridSize; i += 2) {
+    for (let j = -gridSize; j <= gridSize; j += 2) {
+     const x = i * spacing;
+     const z = j * spacing;
+     let y = 0;
+
+     if (currentMode === 'gan') {
+      // GAN Minimax loss saddle surface
+      y = 30 * Math.sin(x * 0.04) * Math.cos(z * 0.04) * (1 / (1 + ganEpoch * 0.5));
+     } else if (currentMode === 'vae') {
+      // VAE Gaussian latent density surface
+      const r2 = (x * x + z * z) * 0.0005;
+      y = -60 * Math.exp(-r2);
+     } else if (currentMode === 'diff') {
+      // Diffusion parabolic potential well
+      const tStep = parseInt(document.getElementById('slider-t').value, 10);
+      const noise = (tStep / 100) * (Math.sin(x * 0.2) + Math.cos(z * 0.2)) * 20;
+      y = 0.003 * (x * x + z * z) + noise - 40;
+     }
+
+     const p = project(x, y, z);
+     ctx3d.fillStyle = currentMode === 'gan' ? '#6366f1' : currentMode === 'vae' ? '#38bdf8' : '#ec4899';
+     ctx3d.beginPath();
+     ctx3d.arc(p.px, p.py, 2.5 * p.scale, 0, Math.PI * 2);
+     ctx3d.fill();
+    }
+   }
+
+   // Draw active sampling point trajectory
+   let px = 0, py = 0, pz = 0;
+   if (currentMode === 'vae') {
+    const z1 = parseFloat(document.getElementById('slider-z1').value);
+    const z2 = parseFloat(document.getElementById('slider-z2').value);
+    px = z1 * 40;
+    pz = z2 * 40;
+    const r2 = (px * px + pz * pz) * 0.0005;
+    py = -60 * Math.exp(-r2);
+   } else if (currentMode === 'diff') {
+    const tStep = parseInt(document.getElementById('slider-t').value, 10);
+    px = (tStep / 100) * 60 * Math.sin(tStep * 0.1);
+    pz = (tStep / 100) * 60 * Math.cos(tStep * 0.1);
+    py = 0.003 * (px * px + pz * pz) - 40;
+   } else {
+    px = 0; pz = 0; py = 0;
+   }
+
+   const pActive = project(px, py, pz);
+   ctx3d.fillStyle = '#f59e0b';
+   ctx3d.beginPath();
+   ctx3d.arc(pActive.px, pActive.py, 7 * pActive.scale, 0, Math.PI * 2);
+   ctx3d.fill();
+   ctx3d.strokeStyle = '#ffffff';
+   ctx3d.lineWidth = 2;
+   ctx3d.stroke();
+  }
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+
+  // Initialize initial view
+  setGenMode('gan');
+ 
+  let is3DMode = false;
+  function toggleViewMode() {
+   is3DMode = !is3DMode;
+   const btn = document.getElementById('view-toggle-btn');
+   const c2d = document.getElementById('gen-2d');
+   const c3d = document.getElementById('gen-3d');
+
+   if (btn) {
+    btn.innerText = is3DMode ? '📊 View: 2D Denoising Process' : '🌐 View: 3D Latent Surface';
+    btn.style.background = is3DMode ? 'var(--accent-pink)' : 'var(--accent-teal)';
+   }
+   if (c2d && c3d) {
+    if (c2d.parentElement) c2d.parentElement.style.display = is3DMode ? 'none' : 'block';
+    if (c3d.parentElement) c3d.parentElement.style.display = is3DMode ? 'block' : 'none';
+   }
+  }
+  // Ensure initial state: 2D visible, 3D hidden
+  document.addEventListener('DOMContentLoaded', () => {
+   const c2d = document.getElementById('gen-2d');
+   const c3d = document.getElementById('gen-3d');
+   if (c2d && c3d) {
+    if (c2d.parentElement) c2d.parentElement.style.display = 'block';
+    if (c3d.parentElement) c3d.parentElement.style.display = 'none';
+   }
+  });
+ </script>
+</body>
+</html>
+

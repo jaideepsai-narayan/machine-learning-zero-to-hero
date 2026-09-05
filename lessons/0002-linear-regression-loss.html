@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0002: How AI Measures Mistakes (Loss & MSE)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 1 • Lesson 2</span>
+  <h1>How AI Measures Mistakes 📏</h1>
+  <div class="meta">
+   <span>Level: Beginner</span>
+   <span>Topic: Residuals & Mean Squared Error (MSE)</span>
+   <span><a href="../lessons/0001-what-is-machine-learning.html">&larr; Lesson 0001</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need a Loss Function? (Drawbacks of Guessing Without Feedback)</h2>
+   <p>
+    In Lesson 0001, you visually adjusted the line to fit the pizza prices. But computers don't have eyes! They need a single number that tells them: <em>"How wrong is my guess right now?"</em>
+   </p>
+   <p>
+    This single score of wrongness is called the <strong>Loss Function</strong> (or Error Function). Lower loss means a smarter AI!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>In real-world engineering, selecting the right Loss Function determines whether your AI succeeds or fails in production:</p>
+    <ul>
+     <li><strong>🏠 Real Estate (Zillow Zestimate):</strong> Predicting house prices ($X = \text{sqft, bedrooms, location} \to y = \text{Price}$). Loss measures how many dollars the estimate missed by across 100,000 homes.</li>
+     <li><strong>📈 Stock Market Returns:</strong> Financial algorithms measure regression loss to minimize prediction variance in stock volatility models.</li>
+     <li><strong>⚡ Energy Grid Demand:</strong> Power companies predict megawatt power consumption based on temperature forecasts to prevent blackouts.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Measuring Wrongness with Mean Squared Error)</h2>
+
+   <h3>Step 1: The Prediction ($\hat{y}$)</h3>
+   <p>
+    We write $\hat{y}$ (pronounced <em>"y-hat"</em>) to represent the AI's guess for pizza price:
+   </p>
+   \[ \hat{y}_i = m \cdot x_i + b \]
+
+   <h3>Step 2: The Residual / Difference ($y_i - \hat{y}_i$)</h3>
+   <p>
+    For each pizza order $i$, we subtract the AI's guess from the actual true price ($y_i$):
+   </p>
+   \[ \text{Error}_i = y_i - \hat{y}_i \]
+
+   <h3>Step 3: Why Square the Error? $(y_i - \hat{y}_i)^2$</h3>
+   <p>
+    If one guess is off by $+\$5$ and another guess is off by $-\$5$, adding them together gives $5 + (-5) = 0$! The AI would falsely think it made ZERO mistakes!
+   </p>
+   <p>
+    By squaring the difference, negative signs disappear, and big mistakes get penalized extra hard (being off by 4 becomes a penalty of $4^2 = 16$).
+   </p>
+
+   <h3>Step 4: Average Error — Mean Squared Error (MSE)</h3>
+   <div class="callout green">
+    <div class="callout-title">Mean Squared Error (MSE)</div>
+    \[ \text{MSE} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2 = \frac{1}{N} \sum_{i=1}^{N} (y_i - (m x_i + b))^2 \]
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Interactive 3D Loss Bowl & Residual Canvas) 🚀</h2>
+   <p>
+    Adjust the slope knob ($m$) below to see both the 2D residual error boxes and the corresponding crosshair moving on the <strong>3D Paraboloid Loss Bowl</strong> in real-time! Drag your mouse on the 3D canvas to rotate the bowl!
+   </p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="toggle-btn no-math" onclick="toggleViewMode()">🌐 View: 3D MSE Bowl</button>
+    </div>
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Slope ($m$): Price per slice knob</span>
+      <span id="val-m" style="color: var(--primary-color); font-weight: 700;">1.0</span>
+     </div>
+     <input type="range" id="slider-m" min="0" max="5" step="0.05" value="1.0" oninput="updatePlot()">
+    </div>
+
+    <div class="canvas-stack"><div class="visual-canvas-box" style="position: relative;">
+      <div class="canvas-header">📊 2D Residual Line Fit</div>
+      <canvas id="canvas-2d" width="300" height="240" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+
+     <div class="visual-canvas-box" style="position: relative;">
+      <div class="canvas-header">🌐 3D MSE Loss Surface $J(m)$ (Drag to Rotate)</div>
+      <canvas id="canvas-3d" width="300" height="240" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div></div>
+
+    <div style="text-align: center; font-size: 1.25rem; font-weight: 800; margin-top: 1rem; color: var(--primary-color);">
+     Calculated MSE Loss Score: <span id="loss-score" style="color: var(--accent-pink);">0.00</span>
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Regression Loss Functions</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Loss Function</th>
+       <th style="padding: 10px;">Formula</th>
+       <th style="padding: 10px;">Outlier Sensitivity</th>
+       <th style="padding: 10px;">Differentiability</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>MSE ($ Loss)</strong></td>
+       <td style="padding: 10px;">$\frac{1}{N} \sum (y - \hat{y})^2$</td>
+       <td style="padding: 10px; color: var(--accent-pink);">High (Squared punishment)</td>
+       <td style="padding: 10px;">Everywhere Smooth (^1$)</td>
+       <td style="padding: 10px;">Standard clean regression data without corrupted outliers</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>MAE ($ Loss)</strong></td>
+       <td style="padding: 10px;">$\frac{1}{N} \sum |y - \hat{y}|$</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Low (Robust to outliers)</td>
+       <td style="padding: 10px;">Non-differentiable at \to $</td>
+       <td style="padding: 10px;">Data containing dirty measurement spikes or financial tails</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Huber Loss</strong></td>
+       <td style="padding: 10px;">Hybrid MSE / MAE</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Moderate / Robust</td>
+       <td style="padding: 10px;">Everywhere Smooth (^1$)</td>
+       <td style="padding: 10px;">High-performance production regression pipelines (e.g. XGBoost)</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>4. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     Why do we square the difference $(y - \hat{y})^2$ instead of just using $(y - \hat{y})$ in Mean Squared Error?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Squaring is computationally straightforward and creates a smooth parabola.')">
+      A) Because linear subtraction is too complex for modern GPUs to calculate.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Correct! Squaring prevents positive and negative errors from canceling out, while heavily penalizing larger mistakes.')">
+      B) To prevent positive and negative errors from canceling each other out, and to penalize large mistakes more.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Squaring actually increases the numerical magnitude of errors greater than 1.')">
+      C) To ensure the total loss always stays between 0 and 1.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0001-what-is-machine-learning.html">&larr; Lesson 0001: What is Machine Learning?</a>
+   <a href="../lessons/0003-gradient-descent.html">Next Lesson 0003: Gradient Descent &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0002</p>
+ </footer>
+
+ <script>
+  const points = [
+   { x: 1, y: 5 },
+   { x: 2, y: 8 },
+   { x: 4, y: 14 }
+  ];
+
+  const canvas2d = document.getElementById('canvas-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  const canvas3d = document.getElementById('canvas-3d');
+  const ctx3d = canvas3d.getContext('2d');
+
+  let angleX = 0.5;
+  let angleY = 0.6;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+
+  canvas3d.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas3d.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas3d.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   angleY += (e.clientX - prevMouseX) * 0.01;
+   angleX += (e.clientY - prevMouseY) * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  function getMSE(m) {
+   const b = 2.0;
+   let sumSq = 0;
+   points.forEach(pt => {
+    const err = pt.y - (m * pt.x + b);
+    sumSq += err * err;
+   });
+   return sumSq / points.length;
+  }
+
+  function project3D(x, y, z) {
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   const cx = canvas3d.width / 2 + x1 * 40;
+   const cy = canvas3d.height / 2 + y2 * 3.5;
+   return { px: cx, py: cy, depth: z2 };
+  }
+
+  function draw2D(m) {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   const b = 2.0;
+
+   // Draw Grid
+   ctx2d.strokeStyle = '#e2e8f0';
+   ctx2d.lineWidth = 1;
+   ctx2d.beginPath();
+   ctx2d.moveTo(30, 210); ctx2d.lineTo(280, 210);
+   ctx2d.moveTo(30, 20); ctx2d.lineTo(30, 210);
+   ctx2d.stroke();
+
+   // Axis text
+   ctx2d.fillStyle = '#64748b';
+   ctx2d.font = '10px sans-serif';
+   ctx2d.fillText('Slices (x)', 140, 230);
+   ctx2d.fillText('Price $', 5, 15);
+
+   // Line points: x mapped [0, 5] -> [30, 270], y mapped [0, 16] -> [210, 30]
+   const toPxX = (val) => 30 + val * 48;
+   const toPxY = (val) => 210 - val * 11;
+
+   // Draw AI line
+   ctx2d.strokeStyle = '#4f46e5';
+   ctx2d.lineWidth = 3;
+   ctx2d.beginPath();
+   ctx2d.moveTo(toPxX(0), toPxY(b));
+   ctx2d.lineTo(toPxX(5), toPxY(m * 5 + b));
+   ctx2d.stroke();
+
+   // Residuals and points
+   points.forEach(pt => {
+    const yPred = m * pt.x + b;
+    ctx2d.strokeStyle = '#22c55e';
+    ctx2d.lineWidth = 2;
+    ctx2d.setLineDash([4, 4]);
+    ctx2d.beginPath();
+    ctx2d.moveTo(toPxX(pt.x), toPxY(pt.y));
+    ctx2d.lineTo(toPxX(pt.x), toPxY(yPred));
+    ctx2d.stroke();
+    ctx2d.setLineDash([]);
+
+    ctx2d.beginPath();
+    ctx2d.arc(toPxX(pt.x), toPxY(pt.y), 6, 0, Math.PI * 2);
+    ctx2d.fillStyle = '#ef4444';
+    ctx2d.fill();
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 1.5;
+    ctx2d.stroke();
+   });
+  }
+
+  function render3D() {
+   ctx3d.clearRect(0, 0, canvas3d.width, canvas3d.height);
+   const currentM = parseFloat(document.getElementById('slider-m').value);
+
+   // Draw 3D Paraboloid Bowl Mesh
+   ctx3d.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+   ctx3d.lineWidth = 1;
+
+   for (let mVal = 0; mVal <= 5; mVal += 0.4) {
+    ctx3d.beginPath();
+    let first = true;
+    for (let bVal = -1; bVal <= 5; bVal += 0.5) {
+     // MSE loss height
+     const loss = (getMSE(mVal) + (bVal - 2)*(bVal - 2)*0.8) * 4;
+     const p = project3D((mVal - 2.5), (bVal - 2), loss);
+     if (first) { ctx3d.moveTo(p.px, p.py); first = false; }
+     else { ctx3d.lineTo(p.px, p.py); }
+    }
+    ctx3d.stroke();
+   }
+
+   // Render Current Operating Point on 3D Surface
+   const currentLoss = getMSE(currentM) * 4;
+   const pt3d = project3D((currentM - 2.5), 0, currentLoss);
+
+   ctx3d.beginPath();
+   ctx3d.arc(pt3d.px, pt3d.py, 7, 0, Math.PI * 2);
+   ctx3d.fillStyle = '#ec4899';
+   ctx3d.fill();
+   ctx3d.strokeStyle = '#ffffff';
+   ctx3d.lineWidth = 2;
+   ctx3d.stroke();
+
+   ctx3d.fillStyle = '#db2777';
+   ctx3d.font = 'bold 11px sans-serif';
+   ctx3d.fillText(`(m=${currentM.toFixed(1)}, Loss=${(currentLoss/4).toFixed(2)})`, pt3d.px + 10, pt3d.py - 5);
+
+   draw2D(currentM);
+   requestAnimationFrame(render3D);
+  }
+
+  function updatePlot() {
+   const m = parseFloat(document.getElementById('slider-m').value);
+   document.getElementById('val-m').innerText = m.toFixed(2);
+   const mse = getMSE(m);
+   document.getElementById('loss-score').innerText = mse.toFixed(2);
+  }
+
+  render3D();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ 
+  let is3DMode = false;
+  function toggleViewMode() {
+   is3DMode = !is3DMode;
+   const btn = document.getElementById('view-toggle-btn');
+   const c2d = document.getElementById('canvas-2d');
+   const c3d = document.getElementById('canvas-3d');
+
+   if (btn) {
+    btn.innerText = is3DMode ? '📊 View: 2D Residual Squares' : '🌐 View: 3D MSE Bowl';
+    btn.style.background = is3DMode ? 'var(--accent-pink)' : 'var(--accent-teal)';
+   }
+   if (c2d && c3d) {
+    c2d.style.display = is3DMode ? 'none' : 'block';
+    c3d.style.display = is3DMode ? 'block' : 'none';
+   }
+  }
+  // Ensure initial state: 2D visible, 3D hidden
+  document.addEventListener('DOMContentLoaded', () => {
+   const c2d = document.getElementById('canvas-2d');
+   const c3d = document.getElementById('canvas-3d');
+   if (c2d && c3d) {
+    c2d.style.display = 'block';
+    c3d.style.display = 'none';
+   }
+  });
+ </script>
+</body>
+</html>

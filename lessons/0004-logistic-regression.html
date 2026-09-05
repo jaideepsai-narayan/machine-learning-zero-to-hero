@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0004: Sorting Things (Logistic Regression & Sigmoid)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 2 • Lesson 4</span>
+  <h1>Sorting Things: Logistic Regression 🐱 vs 🐶</h1>
+  <div class="meta">
+   <span>Level: Beginner</span>
+   <span>Topic: Classification, Sigmoid Function & Log Loss</span>
+   <span><a href="../lessons/0003-gradient-descent.html">&larr; Lesson 0003</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Logistic Regression? (Drawbacks of Linear Regression on Yes/No Choices)</h2>
+   <p>
+    In Linear Regression, we predicted continuous numbers like pizza prices ($15.50). But what if we want to answer a <strong>Yes/No question</strong>?
+   </p>
+   <ul>
+    <li>Is this email <strong>Spam (1)</strong> or <strong>Not Spam (0)</strong>?</li>
+    <li>Will a patient have heart disease <strong>Yes (1)</strong> or <strong>No (0)</strong>?</li>
+   </ul>
+   <p>
+    If we use a straight line $y = mx + b$, predictions can shoot off to $+\infty$ or $-\infty$. We need a magic mathematical function that squishes any number between <strong>0 and 1</strong> (a Probability!).
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Logistic Regression is the workhorse classification algorithm across mission-critical industries:</p>
+    <ul>
+     <li><strong>🏥 Medical Screening:</strong> Predicting whether a tumor biopsy is Malignant (1) vs. Benign (0).</li>
+     <li><strong>💳 Credit Default Prediction:</strong> Banks estimate the probability ($0.0$ to $1.0$) that an applicant will default on a credit loan.</li>
+     <li><strong>📧 Gmail Spam Filter:</strong> Classifying incoming emails as Spam (1) or Inbox (0) in real time.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Mapping Scores to Probabilities via the Sigmoid S-Curve)</h2>
+   <p>
+    The <strong>Sigmoid Function</strong> takes any real number $z$ and bends it into an S-shaped curve between $0$ and $1$:
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The Sigmoid Formula</div>
+    \[ \sigma(z) = \frac{1}{1 + e^{-z}} \]
+    where $z = m \cdot x + b$.
+   </div>
+
+   <h3>Step-by-Step Derivation of Predictions:</h3>
+   <ol>
+    <li>Compute linear score: $z = m \cdot x + b$.</li>
+    <li>Pass through Sigmoid: $\hat{p} = \sigma(z) = \frac{1}{1 + e^{-z}}$.</li>
+    <li>If $\hat{p} \ge 0.5 \implies$ Predict <strong>Class 1 (Yes)</strong>. Otherwise Predict <strong>Class 0 (No)</strong>.</li>
+   </ol>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Sigmoid Formula $\sigma(z)$ & Log Loss Derivation)</h2>
+   <p>
+    Mean Squared Error works poorly for probabilities. Instead, we use <strong>Log Loss</strong>, which severely punishes an AI that is confidently WRONG!
+   </p>
+
+   <div class="callout pink">
+    <div class="callout-title">Binary Cross-Entropy Loss</div>
+    \[ \text{Loss} = - \Big[ y \log(\hat{p}) + (1 - y) \log(1 - \hat{p}) \Big] \]
+   </div>
+
+   <ul>
+    <li>If true label $y = 1$: Loss $= -\log(\hat{p})$. If $\hat{p} &rarr; 0$, Loss $&rarr; +\infty$ (Huge Penalty!).</li>
+    <li>If true label $y = 0$: Loss $= -\log(1 - \hat{p})$. If $\hat{p} &rarr; 1$, Loss $&rarr; +\infty$ (Huge Penalty!).</li>
+   </ul>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🔥 Binary Cross-Entropy Loss (Log Loss)</div>
+    <p>We cannot use MSE for Logistic Regression because Sigmoid turns the loss curve non-convex with many local trap valleys! Instead, we use <strong>Log Loss</strong>:</p>
+    \[ \mathcal{L}(\theta) = - \frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) 
+\right] \]
+    <ul>
+     <li>If true label $y = 1$ and prediction $\hat{y} \to 0$, Loss explodes to $+\infty</li>
+     <li>If true label $y = 0$ and prediction $\hat{y} \to 1$, Loss explodes to $+\infty</li>
+    </ul>
+   </div>
+
+   <div class="callout green" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎛️ Tuning Decision Thresholds & Multi-Class Softmax</div>
+    <ul>
+     <li><strong>Threshold Tuning:</strong> By default, threshold is 0.5$. In medical diagnosis, we lower the threshold to 0.15$ to catch <em>every possible cancer case</em> (maximizing Recall), accepting a few false alarms.</li>
+     <li><strong>Multi-Class (Softmax):</strong> For $K > 2$ classes (e.g. Cat vs. Dog vs. Bird), Sigmoid generalizes to <strong>Softmax</strong>:</li>
+    </ul>
+    \[ \text{Softmax}(z)_i = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}} \]
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive 3D Sigmoid & Decision Surface Playground 🚀</h2>
+   <p>Adjust the linear score $z$ slider to watch Sigmoid transform raw scores into clean probabilities, and <strong>drag your mouse over the 3D canvas</strong> to view the 3D S-curve probability surface!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Raw Linear Score ($z = mx + b$):</span>
+      <span id="val-z" style="color: var(--primary-color); font-weight: 700;">0.0</span>
+     </div>
+     <input type="range" id="slider-z" min="-6" max="6" step="0.2" value="0" oninput="updateSigmoid()">
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;" class="no-math">
+     
+    </div>
+
+    <div class="visual-canvas-box" style="text-align: center; position: relative;">
+     <canvas id="sigmoid-3d-canvas" width="600" height="340" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+    </div>
+
+    <div style="text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--text-color); margin-top: 0.5rem;">
+     Calculated Probability $\hat{p} = \sigma(z)$: <span id="prob-val" style="color: var(--accent-pink);">50.0%</span>
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Linear vs. Binary vs. Multi-Class</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Model</th>
+       <th style="padding: 10px;">Target Output</th>
+       <th style="padding: 10px;">Activation</th>
+       <th style="padding: 10px;">Loss Function</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Linear Regression</strong></td>
+       <td style="padding: 10px;">Continuous number ($y \in \mathbb{R}$)</td>
+       <td style="padding: 10px;">None (Identity)</td>
+       <td style="padding: 10px;">MSE / MAE</td>
+       <td style="padding: 10px;">Predicting house prices, temperature, sales revenue</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Logistic Regression</strong></td>
+       <td style="padding: 10px;">Probability $P(y=1) \in [0, 1]$</td>
+       <td style="padding: 10px;">Sigmoid $\sigma(z)$</td>
+       <td style="padding: 10px;">Binary Cross-Entropy</td>
+       <td style="padding: 10px;">Binary Yes/No classification (Spam, Fraud, Disease)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Softmax Regression</strong></td>
+       <td style="padding: 10px;">Multi-class probability distribution</td>
+       <td style="padding: 10px;">Softmax</td>
+       <td style="padding: 10px;">Categorical Cross-Entropy</td>
+       <td style="padding: 10px;">Multi-class classification (Handwritten digits 0-9, Image categories)</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What happens to the Sigmoid probability output $\sigma(z)$ when the raw score $z$ becomes a very large positive number (e.g., $z = +100$)?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! As z -> +infinity, e^(-z) -> 0, so 1 / (1 + 0) = 1.0 (100% confidence).')">
+      A) It approaches exactly 1.0 (100% probability).
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Sigmoid caps predictions strictly between 0 and 1.')">
+      B) It grows infinitely large towards +100.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. 0.0 occurs when z becomes a very large negative number.')">
+      C) It drops to 0.0.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0003-gradient-descent.html">&larr; Lesson 0003: Gradient Descent</a>
+   <a href="../lessons/0005-support-vector-machines.html">Next Lesson 0005: Support Vector Machines &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0004</p>
+ </footer>
+
+ <script>
+  const canvas = document.getElementById('sigmoid-3d-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let currentZ = 0.0;
+
+  function render2D() {
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   const padX = 60, padY = 40;
+   const wWidth = canvas.width - 2 * padX;
+   const wHeight = canvas.height - 2 * padY;
+
+   // Axes & Grid
+   ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+   for (let zVal = -6; zVal <= 6; zVal += 2) {
+    const px = padX + ((zVal + 6) / 12.0) * wWidth;
+    ctx.beginPath(); ctx.moveTo(px, padY); ctx.lineTo(px, canvas.height - padY); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('z=' + zVal, px, canvas.height - 15);
+   }
+
+   for (let pVal = 0.0; pVal <= 1.0; pVal += 0.25) {
+    const py = canvas.height - padY - pVal * wHeight;
+    ctx.beginPath(); ctx.moveTo(padX, py); ctx.lineTo(canvas.width - padX, py); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText((pVal * 100).toFixed(0) + '%', padX - 8, py + 4);
+   }
+
+   // Axis Titles
+   ctx.fillStyle = '#475569';
+   ctx.font = 'bold 12px Inter, sans-serif';
+   ctx.textAlign = 'center';
+   ctx.fillText('Linear Score (z = mx + b)', canvas.width / 2, canvas.height - 3);
+
+   // Threshold Line 0.5
+   const py50 = canvas.height - padY - 0.5 * wHeight;
+   ctx.setLineDash([4, 4]); ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5;
+   ctx.beginPath(); ctx.moveTo(padX, py50); ctx.lineTo(canvas.width - padX, py50); ctx.stroke();
+   ctx.setLineDash([]);
+   ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'left';
+   ctx.fillText('Threshold p = 0.5 (Decision Boundary)', padX + 10, py50 - 6);
+
+   // Sigmoid Curve
+   ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 3.5;
+   ctx.beginPath();
+   let first = true;
+   for (let zVal = -6.0; zVal <= 6.0; zVal += 0.1) {
+    const p = 1 / (1 + Math.exp(-zVal));
+    const px = padX + ((zVal + 6) / 12.0) * wWidth;
+    const py = canvas.height - padY - p * wHeight;
+    if (first) { ctx.moveTo(px, py); first = false; }
+    else { ctx.lineTo(px, py); }
+   }
+   ctx.stroke();
+
+   // Current z point
+   const currP = 1 / (1 + Math.exp(-currentZ));
+   const currPx = padX + ((currentZ + 6) / 12.0) * wWidth;
+   const currPy = canvas.height - padY - currP * wHeight;
+
+   ctx.beginPath(); ctx.arc(currPx, currPy, 9, 0, Math.PI * 2);
+   ctx.fillStyle = '#ec4899'; ctx.fill();
+   ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
+
+   ctx.fillStyle = '#ec4899'; ctx.font = 'bold 12px Inter, sans-serif';
+   ctx.textAlign = currentZ > 0 ? 'right' : 'left';
+   ctx.fillText(`z = ${currentZ.toFixed(1)}, p = ${(currP * 100).toFixed(1)}%`, currPx + (currentZ > 0 ? -12 : 12), currPy - 10);
+  }
+
+  function updateSigmoid() {
+   currentZ = parseFloat(document.getElementById('slider-z').value);
+   document.getElementById('val-z').innerText = currentZ.toFixed(1);
+   const prob = 1 / (1 + Math.exp(-currentZ));
+   document.getElementById('prob-val').innerText = (prob * 100).toFixed(1) + '%';
+  }
+
+  function mainLoop() {
+   render2D();
+   requestAnimationFrame(mainLoop);
+  }
+
+  updateSigmoid();
+  mainLoop();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

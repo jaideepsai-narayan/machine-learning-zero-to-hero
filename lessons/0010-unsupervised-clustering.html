@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0010: Unsupervised Clustering (K-Means & DBSCAN)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 4 • Lesson 10</span>
+  <h1>Unsupervised Clustering: Finding Secret Groups 🔍</h1>
+  <div class="meta">
+   <span>Level: Intermediate</span>
+   <span>Topic: K-Means, Elbow Method, Hierarchical & DBSCAN</span>
+   <span><a href="../lessons/0009-dimensionality-reduction-pca.html">&larr; Lesson 0009</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Unsupervised Learning? (Drawbacks of Requiring Human Labels)</h2>
+   <p>
+    In Supervised Learning, every training sample had a ground-truth target label $y$ (e.g., $15.50 or Spam). But in <strong>Unsupervised Learning</strong>, we have ONLY inputs $x$, and the computer must automatically discover hidden natural groupings!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Unsupervised Clustering unlocks business value when target labels do not exist:</p>
+    <ul>
+     <li><strong>🛍️ E-Commerce Customer Persona Segmentation:</strong> Grouping users into purchasing behavior clusters (e.g., Bargain Hunters, VIP Spenders, Impulse Buyers) to run targeted marketing.</li>
+     <li><strong>🔒 Cybersecurity & Anomaly Detection:</strong> Security tools use density clustering (DBSCAN) to identify unusual server traffic clusters flagged as DDoS attacks or data exfiltration.</li>
+     <li><strong>🎨 Image Color Quantization:</strong> Compressing 16-million RGB color photos down to 16 dominant colors using K-Means centroid color palettes.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Finding Secret Natural Groups with K-Means & DBSCAN)</h2>
+   <p>K-Means groups data into $K$ distinct clusters by minimizing Inertia (within-cluster sum-of-squares):</p>
+
+   <div class="callout green">
+    <div class="callout-title">K-Means Objective Function</div>
+    \[ \text{Inertia} = \sum_{k=1}^{K} \sum_{x_i \in C_k} \|x_i - \mu_k\|^2 \]
+   </div>
+
+   <ol>
+    <li><strong>Initialize:</strong> Pick $K$ random centroid locations $(\mu_1, \dots, \mu_K)$.</li>
+    <li><strong>Assign:</strong> Label each point $x_i$ to its closest centroid: $\text{Cluster}(x_i) = \arg\min_k \|x_i - \mu_k\|$.</li>
+    <li><strong>Update:</strong> Move each centroid $\mu_k$ to the mathematical mean of all points assigned to it.</li>
+    <li>Repeat steps 2 & 3 until centroids stop moving!</li>
+   </ol>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Centroid Minimization $\mu_k$ & Density $\epsilon$-Neighborhood Connectivity)</h2>
+   <p>
+    How do you pick the best number of clusters $K$? Plot Inertia vs. $K$. As $K$ increases, Inertia drops. Pick the point where the drop sharply flattens out—the <strong>Elbow Point</strong>!
+   </p>
+  </section>
+
+  <section>
+   <h2>4. Hierarchical Clustering & DBSCAN</h2>
+
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ Major Drawback of K-Means:</strong>
+    1. You must guess $K$ beforehand.
+    2. Assumes clusters are spherical balls. Fails completely on complex shapes (e.g., ring inside a ring) or noisy outliers!
+   </div>
+
+   <div class="callout pink">
+    <div class="callout-title">💡 The Solution: DBSCAN</div>
+    <strong>DBSCAN</strong> clusters by density! It connects points within radius $\epsilon$ if they have at least $\text{MinPts}$ neighbors. It automatically finds any arbitrary shape and flags standalone noisy points as <strong>Outliers (-1)</strong>!
+   </div>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">📏 Choosing $: Elbow Method & Silhouette Score</div>
+    <ul>
+     <li><strong>The Elbow Method (WCSS):</strong> Plot Within-Cluster Sum of Squares (Inertia) against $. Pick the "elbow point" where adding more clusters yields diminishing returns.</li>
+     <li><strong>Silhouette Coefficient ($):</strong> Measures how well-separated clusters are on a scale of 569X1$ to 0$:</li>
+     \[ s(i) = \frac{b(i) - a(i)}{\max\left(a(i), b(i)
+ight)} \]
+     where (i)$ is mean intra-cluster distance and (i)$ is nearest-cluster distance.
+     <li><strong>K-Means++ Initialization:</strong> Random initial centroids can lead to terrible local minima! K-Means++ chooses initial centroids weighted by squared distance ((x)^2$) from existing centroids, guaranteeing optimal convergence.</li>
+     <li><strong>DBSCAN Parameters:</strong> $\epsilon$ (neighborhood distance) and <code>min_samples</code>. Points with $< \text{min\_samples}$ in their $\epsilon569Xradius are flagged as <em>Noise (Outliers)</em>.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>5. Interactive K-Means Step Simulator 📍</h2>
+   <p>Click "Run K-Means Iteration" to watch the centroids migrate to the mathematical means of data clusters and colorize 2D Voronoi regions!</p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button class="btn btn-primary" onclick="stepKMeans()">
+      📍 Run K-Means Iteration (Step <span id="kmeans-step">0</span>)
+     </button>
+     <button class="btn btn-slate" onclick="resetKMeans()">
+      🔄 Reset Centroids
+     </button>
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Voronoi Cluster Partition</div>
+      <canvas id="km-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="km-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--primary-color);">
+     Centroids initialized at random locations. Click iteration to step!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Clustering Algorithms</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Algorithm</th>
+       <th style="padding: 10px;">Cluster Shape Ability</th>
+       <th style="padding: 10px;">Requires Specifying 0</th>
+       <th style="padding: 10px;">Noise / Outlier Handling</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>K-Means</strong></td>
+       <td style="padding: 10px;">Spherical / Convex only</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Yes (Must choose $)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Forces outliers into centroids</td>
+       <td style="padding: 10px;">Fast, clean tabular customer segmentation with equal cluster sizes</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>DBSCAN</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">Arbitrary Complex Shapes</td>
+       <td style="padding: 10px; color: var(--accent-teal);">No (Discovers cluster count)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Natively flags Noise points (-1)</td>
+       <td style="padding: 10px;">Geospatial GPS mapping, anomaly/fraud detection, complex shapes</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Hierarchical (Agglomerative)</strong></td>
+       <td style="padding: 10px;">Nested Tree (Dendrogram)</td>
+       <td style="padding: 10px;">Flexible (Cut tree at any height)</td>
+       <td style="padding: 10px;">Moderate</td>
+       <td style="padding: 10px;">Taxonomy trees, gene expression hierarchies, small datasets</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>6. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    <div class="quiz-question">
+     Why is DBSCAN often preferred over K-Means for real-world messy spatial data?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! DBSCAN finds arbitrary density shapes without guessing K in advance and separates noise outliers.')">
+      A) It automatically discovers arbitrary shapes and identifies noise outliers without specifying K in advance.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. DBSCAN does not use matrix eigenvectors.')">
+      B) It calculates matrix eigenvectors using Sigmoid activations.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. DBSCAN requires continuous density metrics.')">
+      C) It requires all features to be categorical text labels.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0009-dimensionality-reduction-pca.html">&larr; Lesson 0009: Dimensionality Reduction</a>
+   <a href="../lessons/0011-backpropagation.html">Next Lesson 0011: Backpropagation Proof &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0010</p>
+ </footer>
+
+ <script>
+  const canvas2d = document.getElementById('km-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let stepCount = 0;
+
+  // 18 Data Points clustered around 3 natural groups
+  const pts = [
+   // Cluster 1 (Left-Top)
+   { x: 100, y: 70 }, { x: 130, y: 110 }, { x: 80, y: 130 }, { x: 150, y: 60 }, { x: 120, y: 150 }, { x: 70, y: 90 },
+   // Cluster 2 (Right-Top)
+   { x: 450, y: 80 }, { x: 500, y: 120 }, { x: 420, y: 140 }, { x: 520, y: 70 }, { x: 480, y: 160 }, { x: 390, y: 100 },
+   // Cluster 3 (Bottom-Center)
+   { x: 280, y: 220 }, { x: 320, y: 250 }, { x: 250, y: 260 }, { x: 350, y: 210 }, { x: 300, y: 270 }, { x: 340, y: 260 }
+  ];
+
+  // 3 Cluster Centroids (K = 3)
+  const initialCentroids = [
+   { x: 200, y: 80, color: '#ef4444', bg: 'rgba(254, 202, 202, 0.4)' },
+   { x: 300, y: 150, color: '#3b82f6', bg: 'rgba(191, 219, 254, 0.4)' },
+   { x: 400, y: 240, color: '#10b981', bg: 'rgba(167, 243, 208, 0.4)' }
+  ];
+
+  let centroids = JSON.parse(JSON.stringify(initialCentroids));
+
+  function getNearestCentroid(x, y) {
+   let minD = Infinity;
+   let idx = 0;
+   centroids.forEach((c, i) => {
+    const d = Math.hypot(x - c.x, y - c.y);
+    if (d < minD) {
+     minD = d;
+     idx = i;
+    }
+   });
+   return idx;
+  }
+
+  function renderKMeans() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   // 1. Draw 2D Voronoi Cell Background Regions
+   const step = 8;
+   for (let px = 0; px < canvas2d.width; px += step) {
+    for (let py = 0; py < canvas2d.height; py += step) {
+     const nearestIdx = getNearestCentroid(px, py);
+     ctx2d.fillStyle = centroids[nearestIdx].bg;
+     ctx2d.fillRect(px, py, step, step);
+    }
+   }
+
+   // 2. Draw Data Points assigned to nearest centroid
+   pts.forEach(p => {
+    const nearestIdx = getNearestCentroid(p.x, p.y);
+    ctx2d.beginPath();
+    ctx2d.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx2d.fillStyle = centroids[nearestIdx].color;
+    ctx2d.fill();
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 2;
+    ctx2d.stroke();
+   });
+
+   // 3. Draw Large Centroid Crosses
+   centroids.forEach((c, i) => {
+    ctx2d.beginPath();
+    ctx2d.arc(c.x, c.y, 11, 0, Math.PI * 2);
+    ctx2d.fillStyle = c.color;
+    ctx2d.fill();
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 3;
+    ctx2d.stroke();
+
+    // Centroid Label
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.font = 'bold 11px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.textBaseline = 'middle';
+    ctx2d.fillText(`μ${i+1}`, c.x, c.y);
+   });
+
+   requestAnimationFrame(renderKMeans);
+  }
+
+  function stepKMeans() {
+   if (stepCount >= 3) {
+    document.getElementById('km-status').innerText = '🎉 K-Means Converged! Inertia minimized and Voronoi regions stable!';
+    document.getElementById('km-status').style.color = 'var(--success-border)';
+    return;
+   }
+
+   stepCount++;
+   document.getElementById('kmeans-step').innerText = stepCount;
+
+   // Calculate new mean position for each centroid based on assigned points
+   centroids.forEach((c, i) => {
+    const assignedPts = pts.filter(p => getNearestCentroid(p.x, p.y) === i);
+    if (assignedPts.length > 0) {
+     const meanX = assignedPts.reduce((acc, p) => acc + p.x, 0) / assignedPts.length;
+     const meanY = assignedPts.reduce((acc, p) => acc + p.y, 0) / assignedPts.length;
+     c.x = Math.round(meanX);
+     c.y = Math.round(meanY);
+    }
+   });
+
+   const status = document.getElementById('km-status');
+   if (stepCount === 1) {
+    status.innerText = 'Step 1: Centroids moved to cluster means of assigned points!';
+    status.style.color = 'var(--primary-color)';
+   } else if (stepCount === 2) {
+    status.innerText = 'Step 2: Voronoi regions updated & centroids re-centered!';
+    status.style.color = 'var(--primary-color)';
+   } else {
+    status.innerText = '🎉 Convergence Achieved! Centroids converged to exact cluster centers!';
+    status.style.color = 'var(--success-border)';
+   }
+  }
+
+  function resetKMeans() {
+   stepCount = 0;
+   document.getElementById('kmeans-step').innerText = '0';
+   centroids = JSON.parse(JSON.stringify(initialCentroids));
+   document.getElementById('km-status').innerText = 'Centroids reset to initial seed locations.';
+   document.getElementById('km-status').style.color = 'var(--primary-color)';
+  }
+
+  renderKMeans();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

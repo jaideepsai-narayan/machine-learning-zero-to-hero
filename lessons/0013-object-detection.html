@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0013: Object Detection (Bounding Boxes, IoU & YOLO)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 6 • Lesson 13</span>
+  <h1>Object Detection: Finding WHERE Things Are 📦</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Bounding Boxes (x,y,w,h), IoU, R-CNN, YOLO & NMS</span>
+   <span><a href="../lessons/0012-cnn-image-classification.html">&larr; Lesson 0012</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Is Classification Not Enough? (Drawbacks of Single-Label Predictions)</h2>
+   <p>
+    Image Classification tells you <em>"What"</em> is in an image. But for autonomous driving or robotics, you need to know <strong>"Where"</strong> every object is!
+   </p>
+   <p>
+    <strong>Object Detection</strong> predicts both a Class Label AND a 4-coordinate Bounding Box: $[x_{\text{center}}, y_{\text{center}}, \text{width}, \text{height}]$.
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Object Detection answers "WHAT and WHERE" for real-time robotic systems:</p>
+    <ul>
+     <li><strong>🚗 Self-Driving Vehicles (Tesla / Waymo):</strong> Detecting cars, pedestrians, stop signs, and cyclists at 60 FPS to calculate collision trajectories.</li>
+     <li><strong>🛒 Cashierless Retail (Amazon Go):</strong> Tracking items grabbed off store shelves using ceiling camera object detectors.</li>
+     <li><strong>🚁 Aerial Drone Inspection:</strong> Scanning solar panel farms or agricultural fields to detect damaged equipment and crop pests.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Predicting Bounding Boxes $[x,y,w,h]$ and Real-Time YOLO)</h2>
+   <p>How do we evaluate if a predicted bounding box matches the ground-truth box?</p>
+
+   <div class="callout green">
+    <div class="callout-title">Intersection over Union (IoU) Formula</div>
+    \[ \text{IoU} = \frac{\text{Area of Overlap}(B_{\text{pred}} \cap B_{\text{gt}})}{\text{Area of Union}(B_{\text{pred}} \cup B_{\text{gt}})} \]
+   </div>
+
+   <ul>
+    <li>$\text{IoU} = 1.0$: Perfect overlap match!</li>
+    <li>$\text{IoU} \ge 0.5$: Standard benchmark threshold for a correct detection.</li>
+   </ul>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Intersection over Union (IoU) & Non-Maximum Suppression (NMS))</h2>
+
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ Two-Stage Detectors (R-CNN, Faster R-CNN):</strong> Propose 2,000 candidate boxes first, then classify each box. Very accurate, but far too slow for real-time video!
+   </div>
+
+   <div class="callout pink">
+    <div class="callout-title">💡 One-Stage Revolution: YOLO (You Only Look Once)</div>
+    <strong>YOLO</strong> treats object detection as a single regression problem! It divides the image into an $S \times S$ grid. A single forward neural network pass predicts all bounding boxes and class probabilities simultaneously in real time (60+ FPS)!
+   </div>
+  </section>
+
+  <section>
+   <h2>4. Cleaning Duplicate Predictions: Non-Maximum Suppression (NMS)</h2>
+   <ol>
+    <li>Filter out all bounding boxes with confidence score below threshold (e.g. $< 0.5$).</li>
+    <li>Pick the box with the highest confidence score.</li>
+    <li>Eliminate any remaining boxes that have $\text{IoU} > 0.5$ with that top box (remove duplicate overlaps!).</li>
+   </ol>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎯 Evaluation Metric: mAP & One-Stage vs. Two-Stage Detectors</div>
+    <ul>
+     <li><strong>One-Stage (YOLO / SSD) vs. Two-Stage (Faster R-CNN):</strong>
+      <ul>
+       <li><strong>One-Stage (YOLO):</strong> Predicts bounding boxes and class probabilities in a single forward pass. Ultra-fast (30-150 FPS), ideal for real-time edge hardware.</li>
+       <li><strong>Two-Stage (Faster R-CNN):</strong> First proposes region candidates (RPN), then classifies each region. Higher accuracy on small objects, but slower (5-15 FPS).</li>
+      </ul>
+     </li>
+     <li><strong>Mean Average Precision (mAP):</strong> The standard industry metric for object detection. Calculates the area under the Precision-Recall curve across all classes:
+      <ul>
+       <li><strong>mAP@0.50:</strong> Evaluates predictions at a lenient IoU threshold of 0.50.</li>
+       <li><strong>mAP@0.50:0.95 (COCO metric):</strong> Averages mAP across IoU thresholds from 0.50 to 0.95 in 0.05 steps.</li>
+      </ul>
+     </li>
+     <li><strong>Anchor Boxes & Feature Pyramid Networks (FPN):</strong> Pre-defined bounding box aspect ratios that allow detectors to identify tiny objects (birds) and huge objects (trucks) simultaneously.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>5. Interactive Bounding Box & IoU Overlap Simulator 📐</h2>
+   <p>Move the predicted box shift slider to watch the Intersection over Union ($\text{IoU}$) overlap region and score update live!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Prediction Box X-Shift:</span>
+      <span id="val-box-x" style="color: var(--primary-color); font-weight: 700;">120 px</span>
+     </div>
+     <input type="range" id="slider-box-x" min="120" max="320" value="120" oninput="updateIoU()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Overlap Area (Ground Truth vs Prediction)</div>
+      <canvas id="iou-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div style="text-align: center; font-size: 1.2rem; font-weight: 800; color: var(--primary-color); margin-top: 0.5rem;">
+     Calculated IoU Score: <span id="iou-score" style="color: var(--success-border);">100.0%</span>
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: One-Stage vs. Two-Stage Object Detectors</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Detector Class</th>
+       <th style="padding: 10px;">Examples</th>
+       <th style="padding: 10px;">Inference Speed</th>
+       <th style="padding: 10px;">Small Object Precision</th>
+       <th style="padding: 10px;">Best Deployment Target</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>One-Stage (Single Pass)</strong></td>
+       <td style="padding: 10px;">YOLOv8, SSD, EfficientDet</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Ultra-Fast (30-150+ FPS)</td>
+       <td style="padding: 10px;">Good to High</td>
+       <td style="padding: 10px;">Real-time video feeds, robotics, autonomous driving, mobile apps</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Two-Stage (Region Based)</strong></td>
+       <td style="padding: 10px;">Faster R-CNN, Cascade R-CNN</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Moderate (5-15 FPS)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">State-of-the-Art Precision</td>
+       <td style="padding: 10px;">Offline medical scans, satellite imagery analysis, high-accuracy benchmarks</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>6. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What is the primary operational advantage of YOLO (You Only Look Once) over R-CNN detectors?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! YOLO predicts bounding boxes and probabilities in a single forward pass, enabling real-time video speeds.')">
+      A) It evaluates the whole image in a single forward pass, making it fast enough for real-time video.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. YOLO uses standard convolutional networks.')">
+      B) It eliminates the need for convolutional feature maps.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. YOLO outputs bounding box coordinates.')">
+      C) It can only perform image classification without bounding boxes.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0012-cnn-image-classification.html">&larr; Lesson 0012: CNNs & Image Classification</a>
+   <a href="../lessons/0014-image-segmentation.html">Next Lesson 0014: Image Segmentation &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0013</p>
+ </footer>
+
+  <script>
+  const canvas2d = document.getElementById('iou-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let boxX = 120;
+
+  function renderIoU() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   const boxW = 160, boxH = 160;
+   const gtX = 120, gtY = 70;
+
+   // 1. Ground Truth Box (Green)
+   ctx2d.fillStyle = 'rgba(34, 197, 94, 0.15)';
+   ctx2d.strokeStyle = '#22c55e';
+   ctx2d.lineWidth = 3;
+   ctx2d.fillRect(gtX, gtY, boxW, boxH);
+   ctx2d.strokeRect(gtX, gtY, boxW, boxH);
+
+   ctx2d.fillStyle = '#15803d';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('Ground Truth Box B_gt', gtX + 10, gtY - 8);
+
+   // 2. Prediction Box (Red/Pink)
+   const predX = boxX, predY = 70;
+   ctx2d.fillStyle = 'rgba(239, 68, 68, 0.15)';
+   ctx2d.strokeStyle = '#ef4444';
+   ctx2d.lineWidth = 3;
+   ctx2d.fillRect(predX, predY, boxW, boxH);
+   ctx2d.strokeRect(predX, predY, boxW, boxH);
+
+   ctx2d.fillStyle = '#b91c1c';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('Predicted Box B_pred', predX + 10, predY + boxH + 18);
+
+   // 3. Intersection Region Calculation & Shading
+   const interLeft = Math.max(gtX, predX);
+   const interRight = Math.min(gtX + boxW, predX + boxW);
+   const interTop = Math.max(gtY, predY);
+   const interBottom = Math.min(gtY + boxH, predY + boxH);
+
+   const interW = Math.max(0, interRight - interLeft);
+   const interH = Math.max(0, interBottom - interTop);
+   const interArea = interW * interH;
+
+   if (interW > 0 && interH > 0) {
+    ctx2d.fillStyle = 'rgba(234, 179, 8, 0.45)';
+    ctx2d.fillRect(interLeft, interTop, interW, interH);
+    ctx2d.strokeStyle = '#ca8a04';
+    ctx2d.lineWidth = 2;
+    ctx2d.setLineDash([4, 4]);
+    ctx2d.strokeRect(interLeft, interTop, interW, interH);
+    ctx2d.setLineDash([]);
+   }
+
+   const unionArea = (boxW * boxH) + (boxW * boxH) - interArea;
+   const iou = interArea / unionArea;
+
+   // 4. Render Live Math Metrics Panel on Right Side
+   const metricsX = 390;
+   ctx2d.fillStyle = '#0f172a';
+   ctx2d.font = 'bold 13px Inter, sans-serif';
+   ctx2d.fillText('📐 Overlap Metrics:', metricsX, 70);
+
+   ctx2d.fillStyle = '#ca8a04';
+   ctx2d.font = '12px Inter, sans-serif';
+   ctx2d.fillText(`Intersection (A ∩ B): ${interArea.toLocaleString()} px²`, metricsX, 105);
+
+   ctx2d.fillStyle = '#475569';
+   ctx2d.fillText(`Union (A ∪ B): ${unionArea.toLocaleString()} px²`, metricsX, 135);
+
+   const scoreEl = document.getElementById('iou-score');
+   const pctStr = (iou * 100).toFixed(1) + '%';
+   scoreEl.innerText = pctStr;
+   scoreEl.style.color = iou >= 0.5 ? 'var(--success-border)' : 'var(--accent-pink)';
+
+   requestAnimationFrame(renderIoU);
+  }
+
+  function updateIoU() {
+   boxX = parseInt(document.getElementById('slider-box-x').value);
+   document.getElementById('val-box-x').innerText = boxX + ' px';
+  }
+
+  updateIoU();
+  renderIoU();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

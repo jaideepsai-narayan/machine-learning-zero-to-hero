@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0001: What is Machine Learning? (The Pizza Mystery)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 1 • Lesson 1</span>
+  <h1>What is Machine Learning? 🍕</h1>
+  <div class="meta">
+   <span>Level: Absolute Beginner</span>
+   <span>Topic: The Big Picture & The Pizza Mystery</span>
+   <span><a href="../MISSION.md">Course Mission</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Machine Learning? (Drawbacks of Hardcoded Rules)</h2>
+   <p>
+    Imagine you run a pizza shop. How would a traditional computer program calculate the price of a pizza order versus how <strong>Machine Learning</strong> does it?
+   </p>
+
+   <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;" class="no-math">
+     
+    </div>
+
+    <div class="visual-canvas-box">
+    <svg class="diagram" width="700" height="240" viewBox="0 0 700 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+     <!-- Traditional Programming Box -->
+     <rect x="20" y="20" width="300" height="200" rx="12" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+     <text x="170" y="50" text-anchor="middle" font-weight="bold" font-size="16" fill="#3730a3">Traditional Programming</text>
+     <rect x="40" y="70" width="110" height="40" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+     <text x="95" y="95" text-anchor="middle" font-size="13" fill="#1e293b">Data (Inputs)</text>
+     <rect x="40" y="125" width="110" height="40" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+     <text x="95" y="150" text-anchor="middle" font-size="13" fill="#1e293b">Rules (Code)</text>
+     <!-- Arrow -->
+     <path d="M160 115 H200" stroke="#4338ca" stroke-width="3" marker-end="url(#arrow)"/>
+     <rect x="205" y="95" width="100" height="40" rx="6" fill="#4f46e5"/>
+     <text x="255" y="120" text-anchor="middle" font-weight="bold" font-size="13" fill="#ffffff">Answers</text>
+
+     <!-- Machine Learning Box -->
+     <rect x="380" y="20" width="300" height="200" rx="12" fill="#ccfbf1" stroke="#14b8a6" stroke-width="2"/>
+     <text x="530" y="50" text-anchor="middle" font-weight="bold" font-size="16" fill="#115e59">Machine Learning</text>
+     <rect x="400" y="70" width="110" height="40" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+     <text x="455" y="95" text-anchor="middle" font-size="13" fill="#1e293b">Data (Inputs)</text>
+     <rect x="400" y="125" width="110" height="40" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+     <text x="455" y="150" text-anchor="middle" font-size="13" fill="#1e293b">Answers (Labels)</text>
+     <!-- Arrow -->
+     <path d="M520 115 H560" stroke="#0d9488" stroke-width="3" marker-end="url(#arrow2)"/>
+     <rect x="565" y="95" width="100" height="40" rx="6" fill="#0d9488"/>
+     <text x="615" y="120" text-anchor="middle" font-weight="bold" font-size="13" fill="#ffffff">Rules (Model)</text>
+
+     <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+       <path d="M 0 0 L 10 5 L 0 10 z" fill="#4338ca"/>
+      </marker>
+      <marker id="arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+       <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d9488"/>
+      </marker>
+     </defs>
+    </svg>
+   </div>
+
+   <ul>
+    <li><strong>Traditional Coding:</strong> A human writes exact rules in code: <code>Price = (Slices * $3) + $2 Delivery</code>. The computer applies these rules to calculate the answer.</li>
+    <li><strong>Machine Learning:</strong> You give the computer 100 past receipts (Inputs: number of slices; Answers: total price). The computer <em>figures out the hidden pattern</em> (the rule) on its own!</li>
+   </ul>
+
+   <!-- Real World Context Section -->
+   <div class="callout purple">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>In industry, Machine Learning powers systems where writing manual rules is impossible due to infinite edge cases:</p>
+    <ul>
+     <li><strong>🎬 Netflix / Spotify Recommenders:</strong> Instead of manually writing rules for millions of users, ML analyzes past watch history to discover hidden taste clusters ( = f(X_{\text{history}})$).</li>
+     <li><strong>🛡️ Financial Fraud Detection:</strong> Banks process millions of credit card transactions per second. An ML model flags suspicious transaction patterns in under 10 milliseconds.</li>
+     <li><strong>📧 Spam Filtering (Gmail):</strong> Spammers constantly tweak words ("F.r.e.e M.o.n.e.y"). Traditional IF/ELSE rules break, but ML automatically adapts to evolving spam patterns.</li>
+    </ul>
+   </div>
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Traditional Coding vs. Machine Learning)</h2>
+   <p>
+    Machine Learning isn't magic—it's geometry! Let's break down the mathematical rule we want the computer to discover:
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The Fundamental ML Formula</div>
+    \[ y = m \cdot x + b \]
+   </div>
+
+   <p>Here is what every symbol means in plain English:</p>
+   <ul>
+    <li><strong style="color: var(--primary-color);">\(x\) (Feature):</strong> What we know (e.g., Number of Pizza Slices = 4).</li>
+    <li><strong style="color: var(--accent-pink);">\(y\) (Target/Prediction):</strong> What we want to guess (e.g., Total Price in dollars).</li>
+    <li><strong style="color: var(--accent-amber);">\(m\) (Weight / Slope):</strong> How much each extra slice adds to the price.</li>
+    <li><strong style="color: #06b6d4;">\(b\) (Bias / Intercept):</strong> The starting cost, even if you order 0 slices (e.g., delivery fee!).</li>
+   </ul>
+
+   <div class="callout blue" style="margin-top: 1.5rem;">
+    <div class="callout-title">🧠 The Three Main Machine Learning Paradigms</div>
+    <ul style="margin-bottom: 0;">
+     <li><strong>1. Supervised Learning:</strong> Learning with a teacher. Data comes with ground-truth answers ($). (e.g., House Price Prediction, Spam Detection).</li>
+     <li><strong>2. Unsupervised Learning:</strong> Learning without answers. Finding hidden clusters or patterns in raw data ($) without target labels. (e.g., Customer Segmentation).</li>
+     <li><strong>3. Reinforcement Learning:</strong> Learning by trial & error. An agent takes actions in an environment to maximize a numerical reward. (e.g., AlphaGo, Self-driving car control).</li>
+    </ul>
+   </div>
+
+   <div class="callout green" style="margin-top: 1.5rem;">
+    <div class="callout-title">📚 Essential Vocabulary & Definitions</div>
+    <ul>
+     <li><strong>Features ($):</strong> The input variables describing the problem (e.g., pizza size, number of toppings, delivery distance).</li>
+     <li><strong>Target / Label ($):</strong> The ground-truth answer we are trying to predict (e.g., final pizza price).</li>
+     <li><strong>Parameters / Weights (, b$):</strong> The internal knobs the AI adjusts during learning to minimize mistakes.</li>
+     <li><strong>Train / Test Split:</strong> Keeping a portion of receipts hidden (Test Set) to verify the model didn't just memorize past data!</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (The Pizza Math: $y = m \cdot x + b$)</h2>
+   <p>
+    Below are 3 receipts from our pizza shop represented as red dots on a graph:
+    <br>• (1 slice, $5) &nbsp;&nbsp;&nbsp; • (2 slices, $8) &nbsp;&nbsp;&nbsp; • (4 slices, $14)
+   </p>
+
+   <div class="interactive-card">
+    <h3>Adjust the AI's Knobs (Weight $m$ and Bias $b$)</h3>
+    <p>Use the sliders below to move the line until it passes right through all three red dots!</p>
+
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Weight ($m$): Price per slice</span>
+      <span id="val-m" style="color: var(--primary-color); font-weight: 700;">1.0</span>
+     </div>
+     <input type="range" id="slider-m" min="0" max="5" step="0.1" value="1.0" oninput="updatePlot()">
+    </div>
+
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Bias ($b$): Delivery fee</span>
+      <span id="val-b" style="color: #06b6d4; font-weight: 700;">1.0</span>
+     </div>
+     <input type="range" id="slider-b" min="0" max="6" step="0.5" value="1.0" oninput="updatePlot()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Pizza Price Line Fitter</div>
+      <svg id="pizza-chart" width="550" height="280" viewBox="0 0 500 260" style="max-width: 100%;">
+       <!-- Grid Lines -->
+       <line x1="50" y1="210" x2="450" y2="210" stroke="#cbd5e1" stroke-width="2"/>
+       <line x1="50" y1="30" x2="50" y2="210" stroke="#cbd5e1" stroke-width="2"/>
+       
+       <!-- Axis Labels -->
+       <text x="250" y="245" text-anchor="middle" font-size="12" fill="#64748b">Slices (x)</text>
+       <text x="20" y="120" text-anchor="middle" font-size="12" fill="#64748b" transform="rotate(-90 20 120)">Price $ (y)</text>
+
+       <!-- Data Points: (1, 5), (2, 8), (4, 14) -->
+       <circle cx="130" cy="150" r="7" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+       <circle cx="210" cy="114" r="7" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+       <circle cx="370" cy="42" r="7" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+
+       <!-- The AI Prediction Line -->
+       <line id="ai-line" x1="50" y1="210" x2="450" y2="210" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+     </div>
+     
+
+    <div id="status-msg" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.8rem; color: #64748b;">
+     Adjust the sliders to fit the line to the data points!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: When to Use ML vs. Traditional Code</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Approach</th>
+       <th style="padding: 10px;">Best For</th>
+       <th style="padding: 10px;">Data Required</th>
+       <th style="padding: 10px;">Key Advantage</th>
+       <th style="padding: 10px;">When NOT to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Traditional Rules</strong></td>
+       <td style="padding: 10px;">Simple, fixed logic (e.g., sales tax calculation)</td>
+       <td style="padding: 10px;">None (human expert defines logic)</td>
+       <td style="padding: 10px;">100% deterministic & instant to implement</td>
+       <td style="padding: 10px;">Complex patterns (e.g., speech recognition, vision)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Supervised ML</strong></td>
+       <td style="padding: 10px;">Predicting known targets from historical examples</td>
+       <td style="padding: 10px;">High (Requires labeled dataset $)</td>
+       <td style="padding: 10px;">High predictive accuracy on unseen data</td>
+       <td style="padding: 10px;">When labeled data is unavailable or zero-error tolerance is needed</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Unsupervised ML</strong></td>
+       <td style="padding: 10px;">Discovering hidden structures/clusters in raw data</td>
+       <td style="padding: 10px;">Medium to High (Unlabeled data $)</td>
+       <td style="padding: 10px;">Requires zero human labeling effort</td>
+       <td style="padding: 10px;">When specific numerical/categorical targets are required</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Reinforcement Learning</strong></td>
+       <td style="padding: 10px;">Sequential decision making & game AI</td>
+       <td style="padding: 10px;">Interactive simulation environment</td>
+       <td style="padding: 10px;">Learns super-human strategy beyond human data</td>
+       <td style="padding: 10px;">Static prediction problems (e.g., spam filtering)</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>4. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     If our machine learning model learned the rule $y = 3x + 2$, what is the predicted price for a customer who orders 5 slices of pizza?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Remember to multiply slices by 3 first: 3 * 5 = 15, then add 2.')">
+      A) $15
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! y = (3 * 5) + 2 = 15 + 2 = $17. You just ran a Machine Learning prediction!')">
+      B) $17
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Check your math: 3 * 5 = 15, then add the bias of $2.')">
+      C) $20
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../index.html">&larr; Master Course Hub</a>
+   <a href="../lessons/0002-linear-regression-loss.html">Next Lesson 0002: Loss Functions & MSE &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0001</p>
+ </footer>
+
+ <script>
+  function updatePlot() {
+   const m = parseFloat(document.getElementById('slider-m').value);
+   const b = parseFloat(document.getElementById('slider-b').value);
+
+   document.getElementById('val-m').innerText = m.toFixed(1);
+   document.getElementById('val-b').innerText = b.toFixed(1);
+
+   const x1 = 0;
+   const y1 = m * x1 + b;
+   const px1 = 50 + x1 * 80;
+   const py1 = 210 - y1 * 12;
+
+   const x2 = 5;
+   const y2 = m * x2 + b;
+   const px2 = 50 + x2 * 80;
+   const py2 = 210 - y2 * 12;
+
+   const line = document.getElementById('ai-line');
+   line.setAttribute('x1', px1);
+   line.setAttribute('y1', py1);
+   line.setAttribute('x2', px2);
+   line.setAttribute('y2', py2);
+
+   const status = document.getElementById('status-msg');
+   if (Math.abs(m - 3.0) < 0.15 && Math.abs(b - 2.0) < 0.3) {
+    status.style.color = 'var(--success-border)';
+    status.innerHTML = '🎉 Perfect Fit! The AI found the rule: Price = $3.0 * Slices + $2.0!';
+   } else {
+    status.style.color = '#64748b';
+    status.innerHTML = 'Keep adjusting m and b to hit all 3 red dots!';
+   }
+  }
+
+  // Initialize plot on load
+  updatePlot();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

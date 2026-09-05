@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0009: Dimensionality Reduction (PCA, t-SNE & UMAP)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 4 • Lesson 9</span>
+  <h1>Dimensionality Reduction: PCA & t-SNE 📉</h1>
+  <div class="meta">
+   <span>Level: Intermediate</span>
+   <span>Topic: The Curse of Dimensionality, PCA Eigenvectors & Manifold Learning</span>
+   <span><a href="../lessons/0008-boosting-adaboost-xgboost.html">&larr; Lesson 0008</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Dimensionality Reduction? (Drawbacks of High Dimensions & Sparsity)</h2>
+   <p>
+    Imagine trying to locate a friend in a 1D line vs a 2D room vs a 3D building vs a 1,000-dimensional space! In 1,000 dimensions, data points become infinitely far apart, and models overfit severely.
+   </p>
+   <p>
+    <strong>Dimensionality Reduction</strong> squishes thousands of noisy features down to 2 or 3 principal axes while keeping the core information!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Dimensionality Reduction turns untrackable high-dimensional data into actionable insights:</p>
+    <ul>
+     <li><strong>🖼️ Image & Signal Compression (Eigenfaces):</strong> Facial recognition systems reduce high-resolution $1024 \times 1024$ pixel images to just 50 principal components while keeping key facial structures.</li>
+     <li><strong>🧬 Genomic Single-Cell RNA Sequencing:</strong> Geneticists reduce 20,000 gene expressions per cell into 2D plots to visualize cell cell-type clusters.</li>
+     <li><strong>⚡ Preprocessing for ML Models:</strong> Removing collinear, redundant features before feeding data into linear models to prevent multi-collinearity.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Principal Component Analysis & Manifold Embeddings)</h2>
+   <p>PCA finds new orthogonal axes (Principal Components) that <strong>maximize variance</strong>:</p>
+
+   <ol>
+    <li><strong>Standardize Data:</strong> Zero-center features ($\mu = 0, \sigma = 1$).</li>
+    <li><strong>Compute Covariance Matrix $\Sigma$:</strong>
+     \[ \Sigma = \frac{1}{N} X^T X \]
+    </li>
+    <li><strong>Calculate Eigenvectors & Eigenvalues:</strong>
+     \[ \Sigma v_i = \lambda_i v_i \]
+     The eigenvector $v_1$ with the largest eigenvalue $\lambda_1$ is <strong>Principal Component 1 ($PC_1$)</strong>!
+    </li>
+    <li><strong>Project Data:</strong> $X_{\text{new}} = X \cdot W_k$ where $W_k$ contains top $k$ eigenvectors.</li>
+   </ol>
+
+   <div class="callout green">
+    <div class="callout-title">Explained Variance Ratio</div>
+    \[ \text{Variance Ratio} = \frac{\lambda_1 + \lambda_2}{\sum \lambda_i} \]
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Covariance Matrix $\Sigma$, Eigenvectors, and Eigenvalues)</h2>
+   <p>
+    PCA only draws straight linear axis projections. If data lies on a curved manifold (like a Swiss Roll), PCA squishes distinct clusters together!
+   </p>
+
+   <div class="callout pink">
+    <div class="callout-title">t-SNE & UMAP Concept</div>
+    <strong>t-SNE</strong> and <strong>UMAP</strong> preserve <em>local neighbor distances</em> using Student-t probability distributions, allowing complex clusters to unpack cleanly in 2D visual maps.
+   </div>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">⚠️ Feature Scaling Requirement & Explained Variance</div>
+    <ul>
+     <li><strong>Mandatory Feature Standardization (569XScore):</strong> PCA looks for axes of maximum variance. If feature $ is measured in dollars (\to \text{ to } 1,000,000$) and feature $ in meters (\to \text{ to } 2$), PCA will completely ignore feature 0 You MUST scale features to $\mu=0, \sigma=1$ before running PCA.</li>
+     <li><strong>Explained Variance Ratio:</strong> Each eigenvector $\mathbf{v}_i$ has an eigenvalue $\lambda_i$ measuring variance along that axis. The fraction of total information preserved by $ components is:</li>
+     \[ \text{Explained Variance Ratio} = \frac{\sum_{i=1}^{k} \lambda_i}{\sum_{j=1}^{P} \lambda_j} \]
+     Targeting \%$ cumulative explained variance is standard practice.
+     <li><strong>Linear PCA vs. Non-Linear Embeddings (t-SNE / UMAP):</strong> PCA only finds straight linear projection axes. For non-linear Swiss-roll manifold data, modern AI uses t-SNE or UMAP to preserve local cluster topology.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive 3D Point Cloud PCA Projection Playground 🚀</h2>
+   <p>Rotate the PCA eigenvector axis below to project the 3D point cloud onto the maximum variance axis! <strong>Drag your mouse over the canvas to rotate the 3D view!</strong></p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="btn btn-primary no-math" onclick="toggleViewMode()">📊 Toggle View: 3D Cloud / 2D PCA Projection</button>
+    </div>
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>PCA Axis Rotation Angle ($PC_1$ Eigenvector):</span>
+      <span id="val-angle" style="color: var(--primary-color); font-weight: 700;">0°</span>
+     </div>
+     <input type="range" id="slider-angle" min="0" max="180" value="0" oninput="updatePCA()">
+    </div>
+
+    <div class="visual-canvas-box" style="text-align: center; position: relative;">
+     <canvas id="pca-3d-canvas" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+    </div>
+
+    <div style="text-align: center; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-top: 0.5rem;">
+     Captured Variance Score: <span id="var-score" style="color: var(--accent-pink);">15.0%</span>
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: PCA vs. t-SNE vs. UMAP</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Algorithm</th>
+       <th style="padding: 10px;">Projection Type</th>
+       <th style="padding: 10px;">Preserves Global vs. Local</th>
+       <th style="padding: 10px;">Computational Speed</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>PCA</strong></td>
+       <td style="padding: 10px;">Linear Hyperplane Projection</td>
+       <td style="padding: 10px;">Global Structure & Distances</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Ultra-Fast ((P^3)$ matrix math)</td>
+       <td style="padding: 10px;">Feature reduction before model training & noise removal</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>t-SNE</strong></td>
+       <td style="padding: 10px;">Non-Linear Manifold (Probability distribution)</td>
+       <td style="padding: 10px;">Local Cluster Topology</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Slow ((N^2)$)</td>
+       <td style="padding: 10px;">High-quality 2D/3D visual cluster exploration</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>UMAP</strong></td>
+       <td style="padding: 10px;">Non-Linear Riemannian Geometry</td>
+       <td style="padding: 10px;">Both Local & Global Structure</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fast ((N \log N)$)</td>
+       <td style="padding: 10px;">Modern single-cell genomics & general embedding visualization</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What mathematical property determines the direction of Principal Component 1 ($PC_1$) in PCA?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! PC1 is the eigenvector corresponding to the largest eigenvalue of the covariance matrix.')">
+      A) The eigenvector of the covariance matrix corresponding to the largest eigenvalue.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Mean squared error is an optimization objective for regression.')">
+      B) The average mean squared error of the dataset.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Sigmoid outputs probabilities for logistic regression.')">
+      C) The output of the Sigmoid activation function.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0008-boosting-adaboost-xgboost.html">&larr; Lesson 0008: Boosting Algorithms</a>
+   <a href="../lessons/0010-unsupervised-clustering.html">Next Lesson 0010: Unsupervised Clustering &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0009</p>
+ </footer>
+
+ <script>
+  const canvas = document.getElementById('pca-3d-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let currentAngle = 0;
+  let angleX = 0.4;
+  let angleY = 0.6;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+  let is3DMode = false;
+
+  canvas.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   angleY += (e.clientX - prevMouseX) * 0.01;
+   angleX += (e.clientY - prevMouseY) * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  // Deterministic 3D Point cloud along major diagonal axis
+  const cloud = [];
+  for (let i = -14; i <= 14; i += 2) {
+   cloud.push({
+    x: i * 8 + Math.sin(i * 1.5) * 12,
+    y: -i * 6 + Math.cos(i * 1.2) * 10,
+    z: i * 3 + Math.sin(i * 0.9) * 8
+   });
+  }
+
+  function project3D(x, y, z) {
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   const cx = canvas.width / 2 + x1;
+   const cy = canvas.height / 2 + y2;
+   return { px: cx, py: cy, depth: z2, x1, y2 };
+  }
+
+  function renderPCA3D() {
+   ctx.clearRect(0, 0, canvas.width, canvas.height);
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   // Eigenvector Axis Direction
+   const rad = currentAngle * Math.PI / 180;
+   const ux = Math.cos(rad);
+   const uy = Math.sin(rad);
+
+   const ax = ux * 180;
+   const ay = uy * 180;
+   const p1 = project3D(-ax, -ay, 0);
+   const p2 = project3D(ax, ay, 0);
+
+   // Draw PC1 Eigenvector Axis
+   ctx.strokeStyle = '#4f46e5';
+   ctx.lineWidth = 3.5;
+   ctx.beginPath();
+   ctx.moveTo(p1.px, p1.py);
+   ctx.lineTo(p2.px, p2.py);
+   ctx.stroke();
+
+   // Draw PC1 Label
+   ctx.fillStyle = '#4f46e5';
+   ctx.font = 'bold 12px Inter, sans-serif';
+   ctx.fillText('PC1 Axis', p2.px + 10, p2.py);
+
+   // Render Points & Projections
+   cloud.forEach(pt => {
+    const projOriginal = project3D(pt.x, pt.y, pt.z);
+
+    // Calculate scalar projection onto (ux, uy, 0)
+    const dot = pt.x * ux + pt.y * uy;
+    const projX = dot * ux;
+    const projY = dot * uy;
+    const projAxis = project3D(projX, projY, 0);
+
+    if (is3DMode) {
+     // Draw orthogonal drop line to PC1 axis
+     ctx.beginPath();
+     ctx.setLineDash([3, 3]);
+     ctx.moveTo(projOriginal.px, projOriginal.py);
+     ctx.lineTo(projAxis.px, projAxis.py);
+     ctx.strokeStyle = '#94a3b8';
+     ctx.lineWidth = 1.2;
+     ctx.stroke();
+     ctx.setLineDash([]);
+
+     // Draw Projected point on PC1
+     ctx.beginPath();
+     ctx.arc(projAxis.px, projAxis.py, 5, 0, Math.PI * 2);
+     ctx.fillStyle = '#06b6d4';
+     ctx.fill();
+     ctx.strokeStyle = '#ffffff';
+     ctx.lineWidth = 1.5;
+     ctx.stroke();
+    }
+
+    // Draw original 3D point
+    ctx.beginPath();
+    ctx.arc(projOriginal.px, projOriginal.py, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+   });
+
+   requestAnimationFrame(renderPCA3D);
+  }
+
+  function updatePCA() {
+   currentAngle = parseInt(document.getElementById('slider-angle').value);
+   document.getElementById('val-angle').innerText = currentAngle + '°';
+
+   // Optimal PCA angle is around 140°
+   const diff = Math.abs(currentAngle - 140);
+   const score = Math.max(14.0, 98.5 - diff * 1.5);
+   const varEl = document.getElementById('var-score');
+   varEl.innerText = score.toFixed(1) + '%';
+   varEl.style.color = score > 85 ? 'var(--success-border)' : 'var(--accent-pink)';
+  }
+
+  function toggleViewMode() {
+   is3DMode = !is3DMode;
+   const btn = document.getElementById('view-toggle-btn');
+   if (btn) {
+    btn.innerText = is3DMode ? '🌐 Mode: 2D Orthogonal Projections On' : '📊 Mode: 3D Point Cloud Only';
+    btn.style.background = is3DMode ? 'var(--accent-pink)' : 'var(--primary-color)';
+   }
+  }
+
+  updatePCA();
+  renderPCA3D();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

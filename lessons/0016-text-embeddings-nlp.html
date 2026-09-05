@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0016: NLP Foundations (Tokenization, TF-IDF & Word2Vec)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 8 • Lesson 16</span>
+  <h1>NLP Foundations: Representing Words numerically 🔤</h1>
+  <div class="meta">
+   <span>Level: Intermediate</span>
+   <span>Topic: Tokenization, One-Hot, TF-IDF, Word2Vec & Vector Arithmetic</span>
+   <span><a href="../lessons/0015-model-evaluation-regularization.html">&larr; Lesson 0015</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Word Embeddings? (Drawbacks of One-Hot Encoding)</h2>
+   <p>
+    Computers cannot read human text like <code>"cat"</code> or <code>"king"</code>. They only process numbers.
+   </p>
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ Drawback of One-Hot Encoding:</strong>
+    If your vocabulary has 50,000 words, every word becomes a 50,000-dimensional vector full of zeros except for a single <code>1</code>.
+    <br>• Huge memory waste (sparse vectors).
+    <br>• <strong>Zero Semantic Meaning:</strong> Dot product between <code>Vector("cat")</code> and <code>Vector("kitten")</code> is 0! The computer thinks "cat" and "kitten" are completely unrelated!
+   </div>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Text embeddings power search engines, recommendation systems, and modern AI chat:</p>
+    <ul>
+     <li><strong>🔍 Google Semantic Search & Vector Databases:</strong> Search engines convert user queries into dense vectors to retrieve relevant web pages by semantic meaning rather than exact keyword matches.</li>
+     <li><strong>🛍️ E-Commerce Product Matching:</strong> Matching user search terms like "warm winter coat" to product catalog items titled "Thermal Puffer Jacket".</li>
+     <li><strong>🤖 Large Language Model Input Pipelines:</strong> Foundation LLMs (ChatGPT, Claude) process human prompt tokens using learned high-dimensional embedding tables.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Dense Vector Spaces & Word2Vec Geometry)</h2>
+   <p>
+    <strong>Word Embeddings</strong> (like <strong>Word2Vec</strong> and <strong>GloVe</strong>) map words into a dense vector space (e.g. 300 dimensions) where words with similar meanings sit close together!
+   </p>
+   
+   <div class="callout green">
+    <div class="callout-title">The Famous Vector Arithmetic Miracle</div>
+    \[ \text{Vector}("King") - \text{Vector}("Man") + \text{Vector}("Woman") \approx \text{Vector}("Queen") \]
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (TF-IDF & Word2Vec Skip-Gram Derivation)</h2>
+
+   <h3>A. Term Frequency - Inverse Document Frequency (TF-IDF)</h3>
+   \[ \text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \log\left( \frac{|D|}{|\{d \in D : t \in d\}|} \right) \]
+   Downweights common filler words like <em>"the"</em>, <em>"is"</em> and highlights rare key terms.
+
+   <h3>B. Word2Vec (Skip-Gram with Negative Sampling)</h3>
+   <p>Predict context words given a target center word $w_t$ within window $c$:</p>
+   \[ \mathcal{L} = \sum_{t=1}^{T} \sum_{-c \le j \le c, j \neq 0} \log P(w_{t+j} | w_t) \]
+   where $P(w_o | w_c) = \frac{\exp(v_{w_o}'^T v_{w_c})}{\sum_{w=1}^{V} \exp(v_w'^T v_{w_c})}$.
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🔤 Subword Tokenization, Cosine Similarity & The Polysemy Problem</div>
+    <ul>
+     <li><strong>Subword Tokenization (BPE / WordPiece):</strong> Modern NLP split words into subword chunks (e.g., <code>"unbeatably"</code> $\to$ <code>["un", "beat", "ably"]</code>). This prevents out-of-vocabulary (OOV) errors and allows tokenizers to handle any word in human language!</li>
+     <li><strong>Cosine Similarity Retrieval Metric:</strong> Measures the angle between two embedding vectors regardless of magnitude:</li>
+     \[ \cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\| \|\mathbf{v}\|} = \frac{\sum u_i v_i}{\sqrt{\sum u_i^2} \sqrt{\sum v_i^2}} \]
+     Identical direction $= 1.0$, orthogonal $= 0.0$, opposite direction $= -1.0$.
+     <li><strong>The Polysemy Problem (Static vs. Contextual):</strong> Word2Vec produces a <em>static fixed vector</em> for every word. Thus, <code>"apple"</code> (the fruit) and <code>"apple"</code> (the iPhone company) share the exact same vector! Contextual embeddings (BERT / GPT) generate dynamic vectors based on surrounding sentence context.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive 3D Word Embedding Vector Calculator 🚀</h2>
+   <p>Click "Compute Vector Analogy" to watch vector translation math ($\text{King} - \text{Man} + \text{Woman} \to \text{Queen}$) rendered live in 3D embedding space! <strong>Drag your mouse to rotate the 3D vector space!</strong></p>
+
+   <div class="interactive-card">
+    <div style="text-align: center; margin-bottom: 1rem;" class="no-math">
+     <button class="btn btn-primary" onclick="calcVector()">
+      🧮 Compute: King - Man + Woman
+     </button>
+    </div>
+
+    <div class="visual-canvas-box" style="text-align: center; position: relative;">
+     <canvas id="nlp-3d-canvas" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+    </div>
+
+    <div style="text-align: center; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-top: 0.5rem;">
+     Vector Math Result: <span id="nlp-res" style="color: var(--success-border);">Click button to run 3D vector analogy!</span>
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: NLP Vectorization Approaches</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Approach</th>
+       <th style="padding: 10px;">Vector Representation</th>
+       <th style="padding: 10px;">Context Sensitivity</th>
+       <th style="padding: 10px;">Out-of-Vocabulary</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Bag-of-Words / TF-IDF</strong></td>
+       <td style="padding: 10px;">Sparse $[1 \times V]$ frequency counts</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Zero (Word order ignored)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Fails on unknown words</td>
+       <td style="padding: 10px;">Fast simple document categorization, baseline spam filtering</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Word2Vec / GloVe</strong></td>
+       <td style="padding: 10px;">Dense $[1 \times D]$ semantic vectors</td>
+       <td style="padding: 10px;">Static word semantics</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Static lookup table</td>
+       <td style="padding: 10px;">Lightweight semantic similarity, fast vector space analogies</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Subword Contextual (BERT / OpenAI Embeddings)</strong></td>
+       <td style="padding: 10px;">Dense contextual dynamic vectors</td>
+       <td style="padding: 10px; color: var(--accent-teal);">High (Surrounding context aware)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Handled via BPE subwords</td>
+       <td style="padding: 10px;">Modern vector databases (RAG), LLM search, enterprise NLP pipelines</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    <div class="quiz-question">
+     What is the primary advantage of Word2Vec dense embeddings over traditional One-Hot word vectors?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Dense embeddings capture semantic relationships so that related words have high cosine similarity dot products.')">
+      A) They capture semantic relationships so that words with similar meanings have high cosine similarity.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. One-hot vectors are sparse.')">
+      B) They force every vector dimension to equal zero except one.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Word2Vec works on all text tokens.')">
+      C) They can only process 2D pixel matrices.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0015-model-evaluation-regularization.html">&larr; Lesson 0015: Model Evaluation</a>
+   <a href="../lessons/0017-rnn-lstm-sequences.html">Next Lesson 0017: Sequential Models & LSTMs &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0016</p>
+ </footer>
+
+ <script>
+  const canvas = document.getElementById('nlp-3d-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let isComputed = false;
+  let animProgress = 0;
+  let angleX = 0.4;
+  let angleY = 0.5;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+
+  canvas.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   angleY += (e.clientX - prevMouseX) * 0.01;
+   angleX += (e.clientY - prevMouseY) * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  const words = [
+   { text: 'King', x: 70, y: -50, z: 40, color: '#4f46e5' },
+   { text: 'Man', x: 70, y: 60, z: 40, color: '#6366f1' },
+   { text: 'Woman', x: -70, y: 60, z: -40, color: '#ec4899' },
+   { text: 'Queen', x: -70, y: -50, z: -40, color: '#22c55e' }
+  ];
+
+  function project3D(x, y, z) {
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   const cx = canvas.width / 2 + x1 * 1.3;
+   const cy = canvas.height / 2 + y2 * 1.3;
+   return { px: cx, py: cy, depth: z2 };
+  }
+
+  function renderNLP3D() {
+   ctx.clearRect(0, 0, canvas.width, canvas.height);
+   ctx.fillStyle = '#ffffff';
+   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+   // Draw 3D Embedding Coordinate Axis Lines
+   const origin = project3D(0, 0, 0);
+   const xAxis = project3D(140, 0, 0);
+   const yAxis = project3D(0, 120, 0);
+   const zAxis = project3D(0, 0, 120);
+
+   ctx.strokeStyle = '#e2e8f0';
+   ctx.lineWidth = 1.5;
+   ctx.beginPath(); ctx.moveTo(origin.px, origin.py); ctx.lineTo(xAxis.px, xAxis.py); ctx.stroke();
+   ctx.beginPath(); ctx.moveTo(origin.px, origin.py); ctx.lineTo(yAxis.px, yAxis.py); ctx.stroke();
+   ctx.beginPath(); ctx.moveTo(origin.px, origin.py); ctx.lineTo(zAxis.px, zAxis.py); ctx.stroke();
+
+   // Draw Man -> Woman Gender Vector
+   const pMan = project3D(words[1].x, words[1].y, words[1].z);
+   const pWoman = project3D(words[2].x, words[2].y, words[2].z);
+
+   ctx.strokeStyle = 'rgba(236, 72, 153, 0.5)';
+   ctx.lineWidth = 2;
+   ctx.setLineDash([4, 4]);
+   ctx.beginPath();
+   ctx.moveTo(pMan.px, pMan.py);
+   ctx.lineTo(pWoman.px, pWoman.py);
+   ctx.stroke();
+   ctx.setLineDash([]);
+
+   ctx.fillStyle = '#db2777';
+   ctx.font = '10px Inter, sans-serif';
+   ctx.fillText('Gender Offset Vector v_gender', (pMan.px + pWoman.px)/2 - 30, (pMan.py + pWoman.py)/2 - 6);
+
+   // If computed, animate vector from King -> Queen along v_gender
+   if (isComputed) {
+    if (animProgress < 1.0) animProgress += 0.03;
+    const pKing = project3D(words[0].x, words[0].y, words[0].z);
+    const pQueen = project3D(words[3].x, words[3].y, words[3].z);
+
+    const curX = pKing.px + (pQueen.px - pKing.px) * Math.min(1.0, animProgress);
+    const curY = pKing.py + (pQueen.py - pKing.py) * Math.min(1.0, animProgress);
+
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(pKing.px, pKing.py);
+    ctx.lineTo(curX, curY);
+    ctx.stroke();
+
+    // Pulse halo around Queen
+    if (animProgress >= 1.0) {
+     ctx.beginPath();
+     ctx.arc(pQueen.px, pQueen.py, 16, 0, Math.PI * 2);
+     ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+     ctx.fill();
+    }
+   }
+
+   // Render Word Nodes
+   words.forEach(w => {
+    const p = project3D(w.x, w.y, w.z);
+
+    ctx.beginPath();
+    ctx.arc(p.px, p.py, (w.text === 'Queen' && isComputed) ? 9 : 7, 0, Math.PI * 2);
+    ctx.fillStyle = (w.text === 'Queen' && isComputed) ? '#22c55e' : w.color;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = (w.text === 'Queen' && isComputed) ? '#15803d' : '#1e293b';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.fillText(w.text, p.px + 12, p.py + 4);
+   });
+
+   requestAnimationFrame(renderNLP3D);
+  }
+
+  function calcVector() {
+   isComputed = true;
+   animProgress = 0;
+   const resEl = document.getElementById('nlp-res');
+   resEl.innerText = 'Queen (Cosine Similarity = 0.94)';
+   resEl.style.color = 'var(--success-border)';
+  }
+
+  renderNLP3D();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

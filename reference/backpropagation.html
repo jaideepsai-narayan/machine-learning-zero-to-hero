@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: Backpropagation & Matrix Calculus Cheat Sheet</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script>
+    MathJax = {
+      options: {
+        ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+        processHtmlClass: 'tex2jax_process'
+      },
+      tex: {
+        inlineMath: [['$', '$'], ['\(', '\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Backpropagation Reference Cheat Sheet</h1>
+    <div class="meta">
+      <span>Topic: Machine Learning Foundations</span>
+      <span>Type: Quick Reference</span>
+      <span><a href="../lessons/0001-backpropagation.html">&larr; Back to Lesson 0001</a></span>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. Core Forward & Backward Equations</h2>
+    <p>For layer \(l \in \{1, \dots, L\}\):</p>
+    
+    <div class="callout">
+      <div class="callout-title">Forward Pass</div>
+      \[ z^{[l]} = W^{[l]} a^{[l-1]} + b^{[l]} \]
+      \[ a^{[l]} = \sigma(z^{[l]}) \]
+      where \(a^{[0]} = x\) (input vector).
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Backward Pass Error Vector \(\delta^{[l]}\)</div>
+      \[ \delta^{[L]} = \nabla_{a^{[L]}} L \odot \sigma'(z^{[L]}) \]
+      \[ \delta^{[l]} = \left( (W^{[l+1]})^T \delta^{[l+1]} \right) \odot \sigma'(z^{[l]}) \]
+    </div>
+
+    <div class="callout">
+      <div class="callout-title">Weight & Bias Parameter Gradients</div>
+      \[ \frac{\partial L}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T \]
+      \[ \frac{\partial L}{\partial b^{[l]}} = \delta^{[l]} \]
+    </div>
+
+    <h2>2. Matrix Calculus & Dimension Rules</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Description</th>
+          <th>Shape / Dimensions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>\(a^{[l-1]}\)</td>
+          <td>Activation vector of layer \(l-1\)</td>
+          <td>\((n_{l-1} \times 1)\)</td>
+        </tr>
+        <tr>
+          <td>\(W^{[l]}\)</td>
+          <td>Weight matrix for layer \(l\)</td>
+          <td>\((n_l \times n_{l-1})\)</td>
+        </tr>
+        <tr>
+          <td>\(b^{[l]}\)</td>
+          <td>Bias vector for layer \(l\)</td>
+          <td>\((n_l \times 1)\)</td>
+        </tr>
+        <tr>
+          <td>\(z^{[l]}\)</td>
+          <td>Pre-activation linear combination</td>
+          <td>\((n_l \times 1)\)</td>
+        </tr>
+        <tr>
+          <td>\(\delta^{[l]}\)</td>
+          <td>Error vector \(\frac{\partial L}{\partial z^{[l]}}\)</td>
+          <td>\((n_l \times 1)\)</td>
+        </tr>
+        <tr>
+          <td>\(\frac{\partial L}{\partial W^{[l]}}\)</td>
+          <td>Gradient matrix w.r.t weights</td>
+          <td>\((n_l \times n_{l-1})\) (Same shape as \(W^{[l]}\))</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Complexity Comparison</h2>
+    <ul>
+      <li><strong>Forward Finite Differences:</strong> \(O(|W| \cdot \text{Forward Cost})\) — requires \(2|W|\) forward passes to evaluate numerical gradients perturbing one weight at a time.</li>
+      <li><strong>Forward-Mode Automatic Differentiation:</strong> Computes \(\frac{\partial a^{[L]}}{\partial w_i}\) forward alongside function values. Requires 1 pass per input feature or parameter (\(O(|W|)\) passes for scalar loss).</li>
+      <li><strong>Reverse-Mode Automatic Differentiation (Backpropagation):</strong> Computes \(\frac{\partial L}{\partial w_i}\) for ALL parameters simultaneously in ONE forward pass and ONE backward pass. Time complexity is \(O(|W|)\) — roughly \(2 \times\) the cost of a single forward pass.</li>
+    </ul>
+  </main>
+
+  <footer>
+    <span>Teaching Workspace: Machine Learning</span>
+    <span><a href="../MISSION.md">View Mission</a></span>
+  </footer>
+</body>
+</html>

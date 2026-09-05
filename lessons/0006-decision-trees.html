@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0006: Decision Trees & 20 Questions Game</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 3 • Lesson 6</span>
+  <h1>Decision Trees: Playing 20 Questions 🌲</h1>
+  <div class="meta">
+   <span>Level: Beginner</span>
+   <span>Topic: Node Splitting, Entropy & Gini Impurity</span>
+   <span><a href="../lessons/0005-support-vector-machines.html">&larr; Lesson 0005</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need Decision Trees? (Drawbacks of Math-Heavy Feature Scaling)</h2>
+   <p>
+    Have you ever played <strong>20 Questions</strong>? If you want to guess a secret object, asking <em>"Is it an animal?"</em> is a great first question because it splits all objects into two neat groups. Asking <em>"Is it named Bob?"</em> is terrible because it barely separates anything!
+   </p>
+   <p>
+    A <strong>Decision Tree</strong> learns by asking a sequence of Yes/No questions on features to separate data into pure groups.
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Decision Trees are prized in industry whenever <strong>interpretability and compliance</strong> are mandatory:</p>
+    <ul>
+     <li><strong>🏦 Financial Credit & Loan Approvals:</strong> Banking regulators require institutions to explain <em>exactly why</em> an applicant was denied a loan (e.g. IF Income < $40k AND Credit Score < 650 THEN Deny).</li>
+     <li><strong>🏥 Emergency Medical Triage:</strong> ER flowcharts use decision trees to route patients to ICU based on vital signs (Heart Rate, Oxygen Saturation, Blood Pressure).</li>
+     <li><strong>📡 Telecom Customer Churn:</strong> Customer success teams extract simple decision rules to identify subscribers at risk of canceling.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Playing 20 Questions to Partition Feature Space)</h2>
+
+   <h3>A. Entropy: The Measure of Chaos</h3>
+   <p>Entropy $H(S)$ measures how mixed up or chaotic a dataset is:</p>
+   <ul>
+    <li><strong>Pure Node (5 Apples, 0 Oranges):</strong> Chaos = 0. Entropy $H = 0$.</li>
+    <li><strong>Maximum Chaos Node (5 Apples, 5 Oranges):</strong> Chaos is high! Entropy $H = 1.0$.</li>
+   </ul>
+
+   <div class="callout green">
+    <div class="callout-title">Shannon Entropy Formula</div>
+    \[ H(S) = - \sum_{i=1}^{C} p_i \log_2(p_i) \]
+    where $p_i$ is the fraction of items belonging to class $i$.
+   </div>
+
+   <h3>B. Gini Impurity (The Faster Alternative)</h3>
+   <p>Calculating logarithms in Entropy takes CPU power. Many trees (like Random Forests) use <strong>Gini Impurity</strong> instead:</p>
+
+   <div class="callout pink">
+    <div class="callout-title">Gini Impurity Formula</div>
+    \[ G(S) = 1 - \sum_{i=1}^{C} p_i^2 \]
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Calculating Entropy $H(S)$, Gini Impurity, and Information Gain)</h2>
+   <p>
+    <strong>Information Gain</strong> is the reduction in Entropy achieved by splitting a node on a feature:
+   </p>
+   \[ \text{Information Gain} = H(\text{Parent}) - \left[ \frac{N_{\text{left}}}{N} H(\text{Left}) + \frac{N_{\text{right}}}{N} H(\text{Right}) \r\right] \]
+   <p>The AI tests every possible question and picks the one with the <strong>Highest Information Gain</strong>!</p>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">⚠️ Overfitting Trap & Tree Pruning Hyperparameters</div>
+    <p>If allowed to grow without limits, a Decision Tree will create a leaf node for every single sample—achieving 100% training accuracy, but failing miserably on new test data!</p>
+    <ul>
+     <li><strong>Pre-Pruning Hyperparameters (Early Stopping):</strong>
+      <ul>
+       <li><code>max_depth</code>: Limits how deep the tree can grow (e.g. depth 3-6).</li>
+       <li><code>min_samples_split</code>: Minimum samples required in a node to attempt a new split.</li>
+       <li><code>min_samples_leaf</code>: Minimum samples required inside a terminal leaf node.</li>
+      </ul>
+     </li>
+     <li><strong>Gini Impurity ($) vs. Entropy ($):</strong>
+      \[ G(S) = 1 - \sum_{i=1}^{C} p_i^2, \quad H(S) = -\sum_{i=1}^{C} p_i \log_2(p_i) \]
+      Gini is faster to compute (no logarithms) and is the default in Scikit-Learn.
+     </li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Tree Decision Boundary Simulator 🚀</h2>
+   <p>Adjust the Tree Depth slider below to see how a Decision Tree recursively slices the 2D feature space into pure decision regions!</p>
+
+   <div class="interactive-card">
+    <div class="slider-container">
+     <div class="slider-label">
+      <span>Max Tree Depth ($1 \dots 4$ splits):</span>
+      <span id="val-depth" style="color: var(--primary-color); font-weight: 700;">2</span>
+     </div>
+     <input type="range" id="slider-depth" min="1" max="4" step="1" value="2" oninput="updateTree()">
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Axis-Aligned Splitting Boxes</div>
+      <canvas id="tree-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="tree-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--success-border);">
+     Depth 2: 4 Axis-aligned decision regions generated with high Gini reduction!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Decision Trees vs. Linear Models</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Feature</th>
+       <th style="padding: 10px;">Decision Trees</th>
+       <th style="padding: 10px;">Linear / Logistic Models</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Feature Scaling Requirement</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">None (Monotonic invariant)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Strictly Required (569Xscore / Normalization)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Non-Linear Relationships</strong></td>
+       <td style="padding: 10px;">Handles automatically via recursive splits</td>
+       <td style="padding: 10px;">Requires manual polynomial feature engineering</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Outlier Sensitivity</strong></td>
+       <td style="padding: 10px; color: var(--accent-teal);">Low (Splits based on rank order)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">High (Outliers distort slope / intercept)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Primary Limitation</strong></td>
+       <td style="padding: 10px; color: var(--accent-pink);">High Variance / Easy Overfitting</td>
+       <td style="padding: 10px;">High Bias / Cannot fit complex non-linear shapes</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     What is the Entropy of a decision tree node that contains 10 Apples 🍎 and 0 Oranges 🍊 (100% pure node)?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! A completely pure node has zero uncertainty, so Entropy H = 0.0.')">
+      A) Exactly 0.0
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Entropy of 0.5 occurs when classes are somewhat mixed.')">
+      B) 0.5
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. 1.0 is the maximum entropy for a 50/50 split.')">
+      C) 1.0
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0005-support-vector-machines.html">&larr; Lesson 0005: Support Vector Machines</a>
+   <a href="../lessons/0007-bagging-random-forests.html">Next Lesson 0007: Bagging & Random Forests &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0006</p>
+ </footer>
+
+ <script>
+  const canvas2d = document.getElementById('tree-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let currentDepth = 2;
+
+  const dataPoints = [
+   { x: 70, y: 60, cls: 'red' }, { x: 120, y: 90, cls: 'red' }, { x: 80, y: 140, cls: 'red' },
+   { x: 190, y: 80, cls: 'red' }, { x: 140, y: 220, cls: 'red' }, { x: 90, y: 260, cls: 'red' },
+   { x: 230, y: 240, cls: 'red' }, { x: 260, y: 110, cls: 'red' },
+
+   { x: 350, y: 190, cls: 'blue' }, { x: 420, y: 220, cls: 'blue' }, { x: 480, y: 160, cls: 'blue' },
+   { x: 530, y: 240, cls: 'blue' }, { x: 380, y: 80, cls: 'blue' }, { x: 460, y: 100, cls: 'blue' },
+   { x: 540, y: 70, cls: 'blue' }, { x: 410, y: 140, cls: 'blue' }
+  ];
+
+  function renderTree() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   // Region Shading based on currentDepth
+   // Depth 1: Vertical Split x = 300
+   ctx2d.fillStyle = 'rgba(254, 226, 226, 0.7)';
+   ctx2d.fillRect(0, 0, 300, 300);
+   ctx2d.fillStyle = 'rgba(219, 234, 254, 0.7)';
+   ctx2d.fillRect(300, 0, 300, 300);
+
+   if (currentDepth >= 2) {
+    // Left sub-split y = 180, Right sub-split y = 130
+    ctx2d.fillStyle = 'rgba(254, 202, 202, 0.6)';
+    ctx2d.fillRect(0, 0, 300, 180);
+    ctx2d.fillStyle = 'rgba(254, 226, 226, 0.7)';
+    ctx2d.fillRect(0, 180, 300, 120);
+
+    ctx2d.fillStyle = 'rgba(191, 219, 254, 0.6)';
+    ctx2d.fillRect(300, 0, 300, 130);
+    ctx2d.fillStyle = 'rgba(219, 234, 254, 0.7)';
+    ctx2d.fillRect(300, 130, 300, 170);
+   }
+
+   if (currentDepth >= 3) {
+    // Additional vertical splits x = 150 and x = 450
+    ctx2d.fillStyle = 'rgba(254, 178, 178, 0.6)';
+    ctx2d.fillRect(0, 0, 150, 180);
+    ctx2d.fillStyle = 'rgba(147, 197, 253, 0.6)';
+    ctx2d.fillRect(450, 130, 150, 170);
+   }
+
+   if (currentDepth >= 4) {
+    // Depth 4: Micro-boxes demoing full axis-aligned decision grid
+    ctx2d.fillStyle = 'rgba(252, 165, 165, 0.7)';
+    ctx2d.fillRect(150, 90, 150, 90);
+   }
+
+   // Draw Split Boundaries
+   ctx2d.strokeStyle = '#475569';
+   ctx2d.lineWidth = 2.5;
+
+   // Main Split 1
+   ctx2d.beginPath();
+   ctx2d.moveTo(300, 0); ctx2d.lineTo(300, 300);
+   ctx2d.stroke();
+
+   ctx2d.fillStyle = '#1e293b';
+   ctx2d.font = 'bold 11px Inter, sans-serif';
+   ctx2d.fillText('Split 1: x = 300', 305, 18);
+
+   if (currentDepth >= 2) {
+    ctx2d.lineWidth = 2;
+    ctx2d.beginPath(); ctx2d.moveTo(0, 180); ctx2d.lineTo(300, 180); ctx2d.stroke();
+    ctx2d.beginPath(); ctx2d.moveTo(300, 130); ctx2d.lineTo(600, 130); ctx2d.stroke();
+
+    ctx2d.fillText('Split 2: y = 180', 10, 175);
+    ctx2d.fillText('Split 3: y = 130', 310, 125);
+   }
+
+   if (currentDepth >= 3) {
+    ctx2d.setLineDash([4, 4]);
+    ctx2d.beginPath(); ctx2d.moveTo(150, 0); ctx2d.lineTo(150, 180); ctx2d.stroke();
+    ctx2d.beginPath(); ctx2d.moveTo(450, 130); ctx2d.lineTo(450, 300); ctx2d.stroke();
+    ctx2d.setLineDash([]);
+   }
+
+   // Draw Data Points
+   dataPoints.forEach(pt => {
+    ctx2d.beginPath();
+    ctx2d.arc(pt.x, pt.y, 7, 0, Math.PI * 2);
+    ctx2d.fillStyle = pt.cls === 'red' ? '#ef4444' : '#3b82f6';
+    ctx2d.fill();
+    ctx2d.strokeStyle = '#ffffff';
+    ctx2d.lineWidth = 2;
+    ctx2d.stroke();
+   });
+
+   requestAnimationFrame(renderTree);
+  }
+
+  function updateTree() {
+   currentDepth = parseInt(document.getElementById('slider-depth').value);
+   document.getElementById('val-depth').innerText = currentDepth;
+   const numRegions = Math.pow(2, currentDepth);
+   document.getElementById('tree-status').innerText = `Depth ${currentDepth}: ${numRegions} Axis-aligned decision leaf regions generated!`;
+  }
+
+  updateTree();
+  renderTree();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

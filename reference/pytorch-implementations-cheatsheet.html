@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: PyTorch Code Implementation Guide for Every ML Model</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script>
+    MathJax = {
+      options: {
+        ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+        processHtmlClass: 'tex2jax_process'
+      },
+      tex: {
+        inlineMath: [['$', '$'], ['\(', '\)']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+  <header>
+    <h1>PyTorch Implementation Guide: From Neurons to LLMs</h1>
+    <div class="meta">
+      <span>Topic: Practical Code & Neural Network Training Loops</span>
+      <span><a href="../index.html">&larr; Back to Master Hub</a></span>
+    </div>
+  </header>
+
+  <main>
+    <p>
+      This reference guide provides production-ready, clean <strong>PyTorch code implementations</strong> for every single neural network architecture and Machine Learning model taught in this course!
+    </p>
+
+    <!-- SECTION 1 -->
+    <div class="interactive-card">
+      <h2>1. The Artificial Neuron (Perceptron) & Training Loop</h2>
+      <p>A single neuron taking inputs $x$, multiplying by weights $w$, adding bias $b$, and passing through a Sigmoid activation:</p>
+
+      <pre><code>import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# 1. Define Single Neuron / Perceptron Model
+class Perceptron(nn.Module):
+    def __init__(self, input_dim):
+        super().__init__()
+        self.linear = nn.Linear(input_dim, 1)  # z = w*x + b
+        self.sigmoid = nn.Sigmoid()            # a = 1 / (1 + e^-z)
+
+    def forward(self, x):
+        return self.sigmoid(self.linear(x))
+
+# 2. Instantiate Model, Loss & Optimizer
+model = Perceptron(input_dim=4)
+criterion = nn.BCELoss()  # Binary Cross-Entropy Loss
+optimizer = optim.SGD(model.parameters(), lr=0.01)
+
+# 3. Standard PyTorch Training Step
+inputs = torch.randn(10, 4)
+labels = torch.randint(0, 2, (10, 1)).float()
+
+# Forward pass
+predictions = model(inputs)
+loss = criterion(predictions, labels)
+
+# Backward pass (Backpropagation!)
+optimizer.zero_grad()
+loss.backward()  # Computes dLoss/dw and dLoss/db automatically
+optimizer.step() # Updates weights: w = w - lr * grad
+</code></pre>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="interactive-card">
+      <h2>2. Multi-Layer Perceptron (MLP / Deep Neural Network)</h2>
+      <p>Stacked hidden layers with non-linear activation functions (ReLU):</p>
+
+      <pre><code>class MultiLayerPerceptron(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_classes):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2), # Regularization
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, num_classes)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+# Training setup for multi-class classification
+model = MultiLayerPerceptron(input_dim=784, hidden_dim=128, num_classes=10)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+</code></pre>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="interactive-card">
+      <h2>3. Convolutional Neural Network (CNN) for Computer Vision</h2>
+      <p>Convolution layers, ReLU activations, and Max Pooling for spatial image classification:</p>
+
+      <pre><code>class ConvNet(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            # Block 1: Conv -> ReLU -> MaxPool
+            nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stroke=2),
+            
+            # Block 2
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stroke=2)
+        )
+        self.classifier = nn.Linear(32 * 7 * 7, num_classes)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = torch.flatten(x, start_dim=1) # Flatten spatial feature map
+        return self.classifier(x)
+</code></pre>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="interactive-card">
+      <h2>4. Recurrent Neural Network (LSTM) for Sequential Data & NLP</h2>
+      <p>Long Short-Term Memory network for processing text sequences and time series:</p>
+
+      <pre><code>class TextLSTM(nn.Module):
+    def __init__(self, vocab_size, embed_dim, hidden_dim, num_classes):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, embed_dim)
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x):
+        embedded = self.embedding(x)          # [batch, seq_len, embed_dim]
+        _, (h_n, _) = self.lstm(embedded)      # h_n shape: [1, batch, hidden_dim]
+        return self.fc(h_n[-1])
+</code></pre>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="interactive-card">
+      <h2>5. Transformer Block with Multi-Head Self-Attention</h2>
+      <p>Parallel sequence self-attention block ($Q, K, V$ dot products):</p>
+
+      <pre><code>class TransformerBlock(nn.Module):
+    def __init__(self, embed_dim, num_heads):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(embed_dim, num_heads, batch_first=True)
+        self.norm1 = nn.LayerNorm(embed_dim)
+        self.ffn = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim * 4),
+            nn.ReLU(),
+            nn.Linear(embed_dim * 4, embed_dim)
+        )
+        self.norm2 = nn.LayerNorm(embed_dim)
+
+    def forward(self, x):
+        # Scaled Dot-Product Self-Attention
+        attn_out, _ = self.attn(query=x, key=x, value=x)
+        x = self.norm1(x + attn_out) # Residual Skip Connection + LayerNorm
+        ffn_out = self.ffn(x)
+        return self.norm2(x + ffn_out)
+</code></pre>
+    </div>
+  </main>
+
+  <footer>
+    <p>Machine Learning Zero to Hero • PyTorch Code Guide</p>
+  </footer>
+</body>
+</html>

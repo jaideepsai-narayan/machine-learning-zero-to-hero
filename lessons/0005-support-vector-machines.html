@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0005: Support Vector Machines (SVMs) & Kernels</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 2 • Lesson 5</span>
+  <h1>Support Vector Machines (SVMs) & Kernels ⚔️</h1>
+  <div class="meta">
+   <span>Level: Intermediate</span>
+   <span>Topic: Max-Margin Hyperplane, Hard/Soft Margin & The Kernel Trick</span>
+   <span><a href="../lessons/0004-logistic-regression.html">&larr; Lesson 0004</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Do We Need SVMs & Kernels? (Drawbacks of Flat Decision Boundaries)</h2>
+   <p>
+    In Logistic Regression, we found <em>any</em> line that separated red and blue dots. But what if a line is super close to a red dot? A tiny bit of noise will make it misclassify!
+   </p>
+   <p>
+    Furthermore, if data points form a red circle inside a blue ring, no 2D straight line can separate them!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>SVMs excel in high-dimensional domains where data is expensive or limited:</p>
+    <ul>
+     <li><strong>🧬 Bioinformatics & Genomics:</strong> Classifying cancer subtypes from gene expression datasets where feature count $P > 20,000$ but sample count $N < 100$.</li>
+     <li><strong>📄 High-Dimensional Text Classification:</strong> Categorizing documents, legal contracts, or spam where vocabulary bag-of-words features are extremely high-dimensional and sparse.</li>
+     <li><strong>✍️ Handwriting & Digit Recognition:</strong> Early postal code digit readers (MNIST) achieved state-of-the-art accuracy using RBF Kernel SVMs.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (The Max-Margin Street Analogy & Higher-Dimensional Projections)</h2>
+   <p>
+    A <strong>Support Vector Machine (SVM)</strong> finds the <strong>widest possible street (Maximum Margin)</strong> between classes.
+   </p>
+
+   <div class="callout green">
+    <div class="callout-title">The Kernel Trick Concept</div>
+    When 2D data is non-linearly separable, the <strong>Kernel Trick</strong> projects data into 3D space by calculating height $z = x^2 + y^2$. In 3D space, a flat 2D cutting plane easily slices between the classes!
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Margin Distance $\frac{2}{\|w\|}$, Soft Margin $C$, and RBF Kernels)</h2>
+
+   <h3>Step 1: Hyperplane & Margin Distance</h3>
+   \[ w^T x + b = 0 \]
+   \[ \text{Margin Width} = \frac{2}{\|w\|} \]
+
+   <h3>Step 2: Radial Basis Function (RBF / Gaussian) Kernel</h3>
+   \[ K(x, x') = \exp\left(-\gamma \|x - x'\|^2\right) \]
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎛️ Key Hyperparameters: Penalty $ & Kernel Gamma $\gamma$</div>
+    <ul>
+     <li><strong>Soft Margin Penalty ($):</strong> Controls trade-off between margin width and classification errors:
+      <ul>
+       <li><strong>High $ (Hard Margin):</strong> Penalizes misclassifications severely. Narrow margin, prone to <em>overfitting</em> noise.</li>
+       <li><strong>Low $ (Soft Margin):</strong> Allows some points inside margin. Wider margin, higher generalization, risk of <em>underfitting</em>.</li>
+      </ul>
+     </li>
+     <li><strong>RBF Kernel Width ($\gamma$):</strong> Defines reach of a single training point:
+      <ul>
+       <li><strong>High $\gamma$:</strong> Points have tight local influence, creating complex, complex decision islands (high variance).</li>
+       <li><strong>Low $\gamma$:</strong> Points have smooth global influence, creating simple boundaries (high bias).</li>
+      </ul>
+     </li>
+     <li><strong>Support Vectors:</strong> Only points lying on or violating the margin boundary (where $\alpha_i > 0$) determine the decision boundary! Non-support vector points can be completely removed without changing the line.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive 3D Kernel Projection Playground 🚀</h2>
+   <p>Click the button below to transform the 2D concentric circles into a 3D paraboloid space! <strong>Drag your mouse over the 3D box to rotate the space in real-time!</strong></p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button id="view-toggle-btn" class="toggle-btn no-math" onclick="toggle3DKernel()">✨ Apply RBF Kernel (Elevate to 3D Space)</button>
+     
+     <button class="toggle-btn no-math" style="background-color: #64748b !important; margin-left: 0.5rem;" onclick="reset3DKernel()">🔄 Reset 2D View</button>
+    </div>
+
+    <div class="visual-canvas-box" style="position: relative;">
+     <canvas id="svm3d-canvas" width="600" height="340" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+    </div>
+
+    <div id="svm3d-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: #64748b;">
+     2D View: Concentric Red/Blue rings are linearly inseparable!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: SVMs vs. Other Classifiers</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Classifier</th>
+       <th style="padding: 10px;">Best Dataset Size</th>
+       <th style="padding: 10px;">Non-Linear Ability</th>
+       <th style="padding: 10px;">Computational Scaling</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Linear SVM</strong></td>
+       <td style="padding: 10px;">Small to Large</td>
+       <td style="padding: 10px;">Linear only</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Fast ((N)$)</td>
+       <td style="padding: 10px;">High-dimensional sparse text data (Bag-of-Words)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Kernel SVM (RBF)</strong></td>
+       <td style="padding: 10px;">Small to Medium ( < 50,000$)</td>
+       <td style="padding: 10px;">High (Kernel Trick)</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Slow ((N^2)$ to (N^3)$)</td>
+       <td style="padding: 10px;">Small complex datasets (Genomics, Microarrays, Bio-signals)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Logistic Regression</strong></td>
+       <td style="padding: 10px;">Medium to Huge</td>
+       <td style="padding: 10px;">Linear (Needs manual features)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Very Fast</td>
+       <td style="padding: 10px;">Probabilistic output needed (Risk estimation, Click-Through-Rate)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Neural Networks</strong></td>
+       <td style="padding: 10px;">Large to Massively Huge</td>
+       <td style="padding: 10px;">Infinite Non-Linear</td>
+       <td style="padding: 10px;">Scales on GPUs</td>
+       <td style="padding: 10px;">Unstructured data (Images, Audio, Natural Text)</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    <div class="quiz-question">
+     What is the main function of the RBF (Gaussian) Kernel in Support Vector Machines?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! RBF maps features into higher dimensions where non-linear patterns become linearly separable.')">
+      A) It computes dot products in a higher-dimensional space where non-linear data becomes linearly separable.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. RBF is a non-linear kernel.')">
+      B) It restricts SVMs to only draw straight lines.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Decision trees use Gini impurity.')">
+      C) It replaces Gini impurity calculations in decision trees.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0004-logistic-regression.html">&larr; Lesson 0004: Logistic Regression</a>
+   <a href="../lessons/0006-decision-trees.html">Next Lesson 0006: Decision Trees &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0005</p>
+ </footer>
+
+ <script>
+  const canvas = document.getElementById('svm3d-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let angleX = 0.4;
+  let angleY = 0.6;
+  let targetZScale = 0.0;
+  let currentZScale = 0.0;
+  let isDragging = false;
+  let prevMouseX = 0;
+  let prevMouseY = 0;
+
+  // Generate Points: Red inner circle (r < 0.8), Blue outer ring (1.5 < r < 2.5)
+  const points = [];
+  for (let i = 0; i < 30; i++) {
+   const r = Math.random() * 0.7;
+   const theta = Math.random() * Math.PI * 2;
+   points.push({ x: r * Math.cos(theta), y: r * Math.sin(theta), type: 'red' });
+  }
+  for (let i = 0; i < 50; i++) {
+   const r = 1.6 + Math.random() * 0.8;
+   const theta = Math.random() * Math.PI * 2;
+   points.push({ x: r * Math.cos(theta), y: r * Math.sin(theta), type: 'blue' });
+  }
+
+  // Interactive Drag Rotation
+  canvas.addEventListener('mousedown', (e) => {
+   isDragging = true;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+   canvas.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+   isDragging = false;
+   canvas.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', (e) => {
+   if (!isDragging) return;
+   const dx = e.clientX - prevMouseX;
+   const dy = e.clientY - prevMouseY;
+   angleY += dx * 0.01;
+   angleX += dy * 0.01;
+   prevMouseX = e.clientX;
+   prevMouseY = e.clientY;
+  });
+
+  function project3D(x, y, z) {
+   // Rotate Y
+   const x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+   const z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+   // Rotate X
+   const y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+   const z2 = y * Math.sin(angleX) + z1 * Math.cos(angleX);
+
+   // Isometric Canvas Center Mapping
+   const cx = canvas.width / 2 + x1 * 60;
+   const cy = canvas.height / 2 + y2 * 50;
+   return { px: cx, py: cy, depth: z2 };
+  }
+
+  function render3D() {
+   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+   // Smooth Animation Transition
+   currentZScale += (targetZScale - currentZScale) * 0.08;
+
+   // Draw Grid Base Plane
+   ctx.strokeStyle = '#cbd5e1';
+   ctx.lineWidth = 1;
+   for (let g = -3; g <= 3; g += 1) {
+    const p1 = project3D(g, -3, 0);
+    const p2 = project3D(g, 3, 0);
+    ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+
+    const p3 = project3D(-3, g, 0);
+    const p4 = project3D(3, g, 0);
+    ctx.beginPath(); ctx.moveTo(p3.px, p3.py); ctx.lineTo(p4.px, p4.py); ctx.stroke();
+   }
+
+   // Draw Hyperplane Cutting Plane if Elevated
+   if (currentZScale > 0.1) {
+    const planeZ = 0.8 * currentZScale;
+    const corner1 = project3D(-3, -3, planeZ);
+    const corner2 = project3D(3, -3, planeZ);
+    const corner3 = project3D(3, 3, planeZ);
+    const corner4 = project3D(-3, 3, planeZ);
+
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(corner1.px, corner1.py);
+    ctx.lineTo(corner2.px, corner2.py);
+    ctx.lineTo(corner3.px, corner3.py);
+    ctx.lineTo(corner4.px, corner4.py);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#15803d';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('3D Hyperplane (z = 0.8)', corner1.px + 10, corner1.py - 5);
+   }
+
+   // Project & Render Points
+   const projPoints = points.map(pt => {
+    // Height formula z = r^2 = x^2 + y^2
+    const rSq = pt.x * pt.x + pt.y * pt.y;
+    const zVal = rSq * currentZScale;
+    const proj = project3D(pt.x, pt.y, zVal);
+    return { ...pt, ...proj };
+   });
+
+   // Sort by depth for correct 3D rendering
+   projPoints.sort((a, b) => b.depth - a.depth);
+
+   projPoints.forEach(pt => {
+    ctx.beginPath();
+    ctx.arc(pt.px, pt.py, pt.type === 'red' ? 7 : 6, 0, Math.PI * 2);
+    ctx.fillStyle = pt.type === 'red' ? '#ef4444' : '#3b82f6';
+    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+    ctx.shadowBlur = 4;
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+   });
+
+   requestAnimationFrame(render3D);
+  }
+
+  function toggle3DKernel() {
+   targetZScale = 0.7;
+   const status = document.getElementById('svm3d-status');
+   status.style.color = 'var(--success-border)';
+   status.innerHTML = '🎉 3D RBF Kernel Applied! Red dots elevated by $z = x^2 + y^2$. A flat green plane now easily separates the classes!';
+   if (window.MathJax) MathJax.typesetPromise([status]);
+  }
+
+  function reset3DKernel() {
+   targetZScale = 0.0;
+   angleX = 0.4;
+   angleY = 0.6;
+   const status = document.getElementById('svm3d-status');
+   status.style.color = '#64748b';
+   status.innerHTML = '2D View: Concentric Red/Blue rings are linearly inseparable!';
+  }
+
+  // Start 3D animation loop
+  render3D();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ 
+  let is3DMode = false;
+  function toggleViewMode() {
+   is3DMode = !is3DMode;
+   const btn = document.getElementById('view-toggle-btn');
+   if (btn) {
+    btn.innerText = is3DMode ? '📊 View: 2D Flat Plane' : '🌐 View: 3D RBF Surface';
+    btn.style.background = is3DMode ? 'var(--accent-pink)' : 'var(--accent-teal)';
+   }
+  }
+
+ </script>
+</body>
+</html>

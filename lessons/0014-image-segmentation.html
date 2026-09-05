@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0014: Image Segmentation (Semantic vs Instance & U-Net)</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\\\(', '\\\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 6 • Lesson 14</span>
+  <h1>Image Segmentation: Pixel-Level Precision 🎨</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Semantic vs Instance Segmentation, U-Net & Skip Connections</span>
+   <span><a href="../lessons/0013-object-detection.html">&larr; Lesson 0013</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Are Bounding Boxes Inefficient for Medical/Autonomous AI? (Drawbacks of Rectangles)</h2>
+   <p>
+    Bounding boxes in object detection leave lots of empty background inside the rectangle. For medical tumor analysis, satellite land mapping, or self-driving drivable surfaces, we need <strong>Pixel-Level Accuracy</strong>!
+   </p>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>Image Segmentation delivers sub-pixel boundary precision for high-stakes applications:</p>
+    <ul>
+     <li><strong>🧠 Medical MRI Brain Scans:</strong> Segmenting exact 3D brain tumor boundaries so surgical robots know where to cut without damaging healthy tissue.</li>
+     <li><strong>🚙 Autonomous Driving Road Surface Mapping:</strong> Classifying exact drivable asphalt pixels vs. curbs, sidewalks, and lane markings.</li>
+     <li><strong>📸 Photo Editing & Video Conferencing:</strong> Live virtual background blurring (Zoom / Teams) and portrait background removal (Photoshop / iOS photo cutout).</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Pixel-Level Precision with Semantic & Instance Segmentation)</h2>
+
+   <div class="callout green">
+    <div class="callout-title">Semantic Segmentation (e.g. U-Net)</div>
+    Classifies every pixel into a category label. All 3 dogs in a photo get colored the exact same label: <code>Dog</code>.
+   </div>
+
+   <div class="callout pink">
+    <div class="callout-title">Instance Segmentation (e.g. Mask R-CNN)</div>
+    Classifies every pixel AND separates distinct object instances! <code>Dog #1</code> is colored Red, <code>Dog #2</code> is colored Blue, <code>Dog #3</code> is colored Green.
+   </div>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (U-Net Encoder-Decoder Paths, Skip Connections, and Dice Loss)</h2>
+   <p>
+    How do we downsample an image to learn high-level concepts and then rebuild it back to full resolution pixel-by-pixel?
+   </p>
+
+   <ul>
+    <li><strong>Encoder (Contracting Path):</strong> Standard CNN layers (Convolutions + Max Pooling) that compress the image into high-level concept features.</li>
+    <li><strong>Decoder (Expanding Path):</strong> Transposed Convolutions (Upsampling) that reconstruct high-resolution spatial pixel maps.</li>
+    <li><strong>U-Net Skip Connections:</strong> Copies exact high-resolution feature maps directly from Encoder to Decoder, preventing blurry pixel edges!</li>
+   </ul>
+  </section>
+
+  <section>
+   <h2>4. Segmentation Loss Functions: Dice Loss</h2>
+   <p>Because background pixels vastly outnumber small target objects, standard MSE fails. We use <strong>Dice Coefficient Loss</strong>:</p>
+
+   <div class="callout green">
+    <div class="callout-title">Dice Loss Formula</div>
+    \[ \text{Dice Loss} = 1 - \frac{2 |Y \cap \hat{Y}|}{|Y| + |\hat{Y}|} \]
+   </div>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">🎨 Segmentation Taxonomy & U-Net Skip Connection Rationale</div>
+    <ul>
+     <li><strong>Segmentation Taxonomy Spectrum:</strong>
+      <ul>
+       <li><strong>Semantic Segmentation:</strong> Labels every pixel into a class category (e.g. all pixels belonging to any car are colored pink).</li>
+       <li><strong>Instance Segmentation:</strong> Distinguishes individual object instances (e.g. Car #1 is pink, Car #2 is blue).</li>
+       <li><strong>Panoptic Segmentation:</strong> Unifies both semantic background stuff (sky, road, grass) and instance objects (people, cars).</li>
+      </ul>
+     </li>
+     <li><strong>Why U-Net Skip Connections are Crucial:</strong> Pooling layers in the encoder shrink spatial dimensions to compress features, but destroy fine spatial edges. U-Net's <strong>Skip Connections</strong> copy high-resolution spatial feature maps directly from encoder layers to corresponding decoder layers, giving the network crystal-clear boundary recovery!</li>
+     <li><strong>Dice Loss for Extreme Pixel Imbalance:</strong> When a tumor occupies only $0.1\%$ of pixels in an X-ray, standard Cross-Entropy loss gets satisfied by predicting background everywhere! <strong>Dice Loss</strong> directly maximizes mask overlap:</li>
+     \[ \text{Dice Loss} = 1 - \frac{2 \sum p_i y_i + \epsilon}{\sum p_i + \sum y_i + \epsilon} \]
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>5. Interactive U-Net Pixel Mask Simulator 🎨</h2>
+   <p>Click "Apply U-Net Mask" to watch U-Net skip-connections reconstruct high-resolution, pixel-level category masks across the entire image!</p>
+
+   <div class="interactive-card">
+    <div class="controls-row no-math">
+     <button class="btn btn-primary" onclick="segmentImage()">
+      🎨 Apply U-Net Pixel Mask
+     </button>
+     <button class="btn btn-slate" onclick="resetSegment()">
+      🔄 Reset View
+     </button>
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Pixel Input & Color-Coded Category Mask Overlay</div>
+      <canvas id="seg-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="seg-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--primary-color);">
+     Raw Pixel Input Loaded. Click Apply to run U-Net Segmentation!
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Bounding Boxes vs. Segmentation Tasks</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Task Type</th>
+       <th style="padding: 10px;">Output Format</th>
+       <th style="padding: 10px;">Annotation Cost</th>
+       <th style="padding: 10px;">Spatial Precision</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Object Detection</strong></td>
+       <td style="padding: 10px;">Bounding Box $[x,y,w,h]$</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Low (Draw 2 box corners)</td>
+       <td style="padding: 10px;">Coarse Rectangle</td>
+       <td style="padding: 10px;">Counting objects, fast real-time tracking (vehicles, pedestrians)</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Semantic Segmentation</strong></td>
+       <td style="padding: 10px;">Class mask grid $[W \times H]$</td>
+       <td style="padding: 10px; color: var(--accent-pink);">High (Pixel painting)</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Pixel-level exact</td>
+       <td style="padding: 10px;">Land-cover satellite mapping, road lane detection, medical organ maps</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Instance Segmentation</strong></td>
+       <td style="padding: 10px;">Individual mask per object</td>
+       <td style="padding: 10px; color: var(--accent-pink);">Very High</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Pixel-level per instance</td>
+       <td style="padding: 10px;">Surgical robotic dissection, automated crop fruit harvesting</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>6. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    <div class="quiz-question">
+     What key architectural component of U-Net prevents object boundaries from becoming blurry during image reconstruction?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Skip connections transfer fine-grained spatial features directly from the encoder to the decoder.')">
+      A) Skip connections that transfer high-resolution spatial feature maps directly from encoder to decoder.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Max pooling reduces spatial resolution.')">
+      B) Repeated max pooling layers.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Gini impurity is for decision trees.')">
+      C) Gini impurity loss minimization.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0013-object-detection.html">&larr; Lesson 0013: Object Detection</a>
+   <a href="../lessons/0015-model-evaluation-regularization.html">Next Lesson 0015: Model Evaluation &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0014</p>
+ </footer>
+
+  <script>
+  const canvas2d = document.getElementById('seg-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let isSegmented = false;
+
+  function drawScene(offsetX, isMask) {
+   // Sky
+   ctx2d.fillStyle = isMask ? 'rgba(59, 130, 246, 0.65)' : '#93c5fd';
+   ctx2d.fillRect(offsetX, 0, 270, 140);
+
+   // Road
+   ctx2d.fillStyle = isMask ? 'rgba(71, 85, 105, 0.75)' : '#334155';
+   ctx2d.fillRect(offsetX, 140, 270, 160);
+
+   // Tree (Green)
+   ctx2d.fillStyle = isMask ? 'rgba(16, 185, 129, 0.75)' : '#059669';
+   ctx2d.beginPath();
+   ctx2d.arc(offsetX + 40, 120, 30, 0, Math.PI * 2);
+   ctx2d.fill();
+   ctx2d.fillRect(offsetX + 35, 140, 10, 30);
+
+   // Car Shape (Red)
+   ctx2d.fillStyle = isMask ? 'rgba(239, 68, 68, 0.85)' : '#dc2626';
+   ctx2d.beginPath();
+   ctx2d.roundRect(offsetX + 110, 150, 100, 45, 8);
+   ctx2d.fill();
+
+   // Pedestrian (Amber)
+   ctx2d.fillStyle = isMask ? 'rgba(245, 158, 11, 0.85)' : '#d97706';
+   ctx2d.beginPath();
+   ctx2d.arc(offsetX + 230, 130, 10, 0, Math.PI * 2);
+   ctx2d.fill();
+   ctx2d.fillRect(offsetX + 226, 140, 8, 30);
+
+   // Class Labels if Mask Mode
+   if (isMask) {
+    ctx2d.fillStyle = '#ffffff';
+    ctx2d.font = 'bold 11px Inter, sans-serif';
+    ctx2d.fillText('Sky (Blue)', offsetX + 10, 30);
+    ctx2d.fillText('Tree (Green)', offsetX + 10, 90);
+    ctx2d.fillText('Car (Red)', offsetX + 130, 175);
+    ctx2d.fillText('Road (Slate)', offsetX + 10, 260);
+    ctx2d.fillText('Person (Amber)', offsetX + 180, 120);
+   }
+  }
+
+  function renderSeg() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   // Divider line down center
+   ctx2d.strokeStyle = '#cbd5e1';
+   ctx2d.lineWidth = 2;
+   ctx2d.beginPath();
+   ctx2d.moveTo(295, 0); ctx2d.lineTo(295, canvas2d.height);
+   ctx2d.stroke();
+
+   // Left Panel: Raw RGB Input
+   ctx2d.fillStyle = '#475569';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('📷 Raw Input Camera Image', 10, 20);
+   drawScene(10, false);
+
+   // Right Panel: U-Net Segmentation Mask Output
+   ctx2d.fillStyle = isSegmented ? '#059669' : '#475569';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText(isSegmented ? '🎨 U-Net Pixel Mask Output' : '🎨 U-Net Output (Pending)', 310, 20);
+   drawScene(310, isSegmented);
+
+   requestAnimationFrame(renderSeg);
+  }
+
+  function segmentImage() {
+   isSegmented = true;
+   document.getElementById('seg-status').innerText = '🎨 U-Net Segmentation Complete: 100% Pixels Classified into Category Masks!';
+   document.getElementById('seg-status').style.color = 'var(--success-border)';
+  }
+
+  function resetSeg() {
+   isSegmented = false;
+   document.getElementById('seg-status').innerText = 'Raw camera pixel input loaded. Click Apply to run U-Net!';
+   document.getElementById('seg-status').style.color = 'var(--primary-color)';
+  }
+
+  function resetSegment() {
+   resetSeg();
+  }
+
+  renderSeg();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>

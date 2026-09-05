@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Lesson 0018: The Transformer Architecture & Self-Attention</title>
+ <link rel="stylesheet" href="../assets/style.css">
+ <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+ <script>
+  MathJax = {
+   options: {
+    ignoreHtmlClass: 'quiz-option|btn-start|badge|button|no-math',
+    processHtmlClass: 'tex2jax_process'
+   },
+   tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+   }
+  };
+ </script>
+ <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+ <header>
+  <span class="badge">Module 8 • Lesson 18</span>
+  <h1>The Transformer Revolution: Self-Attention ⚡</h1>
+  <div class="meta">
+   <span>Level: Advanced</span>
+   <span>Topic: Query/Key/Value Vectors, Scaled Dot-Product Attention & Transformers</span>
+   <span><a href="../lessons/0017-rnn-lstm-sequences.html">&larr; Lesson 0017</a></span>
+  </div>
+ </header>
+
+ <main>
+  <section>
+   <h2>1. WHY Did Transformers Replace LSTMs? (Drawbacks of Sequential Word-by-Word Bottlenecks)</h2>
+
+   <div class="callout alert" style="background-color: var(--alert-bg); border-left: 5px solid var(--alert-border);">
+    <strong>⚠️ Major Limitation of LSTMs:</strong>
+    LSTMs process tokens <strong>strictly sequentially</strong> ($t_1 &rarr; t_2 &rarr; t_3$). You CANNOT train step 50 until step 49 is finished! This creates a massive bottleneck that prevents parallel training on GPUs.
+   </div>
+
+   <div class="callout green">
+    <div class="callout-title">💡 The Transformer Solution (Vaswani et al., 2017)</div>
+    Process <strong>ALL tokens simultaneously in parallel</strong>! Use <strong>Self-Attention</strong> to allow every word to dynamically connect to every other word in the sentence instantly.
+   </div>
+  
+   <!-- Real World Context Section -->
+   <div class="callout purple" style="margin-top: 1.5rem;">
+    <div class="callout-title">🌍 Real-World Industry Context & Case Studies</div>
+    <p>The Transformer is the foundational neural architecture of the Modern AI Era:</p>
+    <ul>
+     <li><strong>🤖 Large Language Models (ChatGPT / Claude / Llama):</strong> Decoder-only Transformers generating human-quality reasoning, code, and dialogue across context windows up to 2,000,000 tokens.</li>
+     <li><strong>💻 AI Code Assistance (GitHub Copilot):</strong> Autocomplete engines processing entire repository contexts to generate multi-line functions.</li>
+     <li><strong>👁️ Vision Transformers (ViT):</strong> Splitting images into $16 \times 16$ pixel patches to achieve state-of-the-art vision classification and multimodal understanding.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>2. WHAT IS IT? (Parallel Processing via Scaled Self-Attention)</h2>
+   <p>Imagine searching in a library database:</p>
+   <ul>
+    <li><strong style="color: var(--primary-color);">Query ($Q$):</strong> What you are looking for (e.g., "What does 'it' refer to?").</li>
+    <li><strong style="color: var(--accent-pink);">Key ($K$):</strong> The index tag of every book in the library.</li>
+    <li><strong style="color: var(--success-border);">Value ($V$):</strong> The actual information content of the book.</li>
+   </ul>
+  </section>
+
+  <section>
+   <h2>3. HOW Does It Work? (Query, Key, Value Vectors & Scaled Dot-Product $\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$)</h2>
+
+   <div class="callout green">
+    <div class="callout-title">Scaled Dot-Product Attention</div>
+    \[ \text{Attention}(Q, K, V) = \text{Softmax}\left( \frac{Q K^T}{\sqrt{d_k}} \right) V \]
+   </div>
+
+   <ol>
+    <li>Compute similarity matrix $Q K^T$ (dot products measuring alignment between queries and keys).</li>
+    <li>Divide by $\sqrt{d_k}$ scaling factor to prevent huge dot products from pushing Softmax into zero-gradient regions.</li>
+    <li>Apply Softmax to convert scores into attention weights summing to 1.0.</li>
+    <li>Multiply weights by $V$ to compute the contextualized embedding output!</li>
+   </ol>
+  
+   <div class="callout red" style="margin-top: 1.5rem;">
+    <div class="callout-title">⚡ Positional Encoding, Causal Masking & $O(N^2)$ Complexity</div>
+    <ul>
+     <li><strong>Why Positional Encoding is Mandatory:</strong> Unlike RNNs which read step-by-step, Self-Attention computes pairwise dot-products for all tokens simultaneously in parallel. The operation is permutation invariant! Adding sinusoidal or learned <strong>Positional Encodings</strong> $\mathbf{PE}_{(pos, 2i)}$ to input embeddings injects word order signal.</li>
+     <li><strong>Causal Masked Attention (Decoder Models):</strong> In generative LLMs (GPT), token $t$ must not see token $t+1$ during training! We set future attention scores to $-\infty$ before Softmax:</li>
+     \[ \text{Attention}(Q, K, V) = \text{Softmax}\left( \frac{Q K^T}{\sqrt{d_k}} + M \right) V, \quad M_{i,j} = \begin{cases} 0 & i \ge j \\ -\infty & i < j \end{cases} \]
+     <li><strong>$O(N^2)$ Quadratic Bottleneck:</strong> Computing pairwise attention matrix $Q K^T$ requires $N \times N$ operations for sequence length $N$. Doubling context length quadruples memory compute! Modern systems use <strong>FlashAttention</strong> (tiled GPU memory layout) to make context scaling practical.</li>
+    </ul>
+   </div>
+
+  </section>
+
+  <section>
+   <h2>4. Interactive Self-Attention Matrix Simulator 🚀</h2>
+   <p>Click a word token below to watch Query $\times$ Key dot products ($\text{Softmax}\frac{QK^T}{\sqrt{d_k}}$) illuminate pairwise attention weights and coreference links live!</p>
+
+   <div class="interactive-card">
+    <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem;" class="no-math">
+     <button class="quiz-option" style="padding: 0.4rem 0.8rem;" onclick="focusWord('The')">The</button>
+     <button class="quiz-option" style="padding: 0.4rem 0.8rem;" onclick="focusWord('robot')">robot</button>
+     <button class="quiz-option" style="padding: 0.4rem 0.8rem;" onclick="focusWord('recharged')">recharged</button>
+     <button class="quiz-option" style="padding: 0.4rem 0.8rem;" onclick="focusWord('its')">its</button>
+     <button class="quiz-option" style="padding: 0.4rem 0.8rem;" onclick="focusWord('battery')">battery</button>
+    </div>
+
+    <div class="visual-canvas-box" >
+      <div class="canvas-header">📊 2D Pairwise Self-Attention Beams & Heatmap Matrix</div>
+      <canvas id="attn-2d" width="600" height="300" style="width: 100%; max-width: 600px; height: auto; border-radius: 8px;"></canvas>
+     </div>
+     
+
+    <div id="attn-status" style="text-align: center; font-weight: 700; font-size: 1.05rem; margin-top: 0.5rem; color: var(--accent-pink);">
+     Token "its" focused: 85% Attention Score linked to "robot" (Coreference resolved!).
+    </div>
+   </div>
+  </section>
+
+  
+  <section>
+   <h2>⚡ Practical Decision Guide: Transformer Family Architectures</h2>
+   <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; font-size: 0.95rem;">
+     <thead>
+      <tr style="background: var(--bg-card); border-bottom: 2px solid var(--border-color);">
+       <th style="padding: 10px;">Architecture Type</th>
+       <th style="padding: 10px;">Attention Masking</th>
+       <th style="padding: 10px;">Famous Models</th>
+       <th style="padding: 10px;">Primary Strength</th>
+       <th style="padding: 10px;">When to Use</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Encoder-Only</strong></td>
+       <td style="padding: 10px;">Bidirectional (Full Context)</td>
+       <td style="padding: 10px;">BERT, RoBERTa</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Rich bidirectional context understanding</td>
+       <td style="padding: 10px;">Text classification, Named Entity Recognition, Search embeddings</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Decoder-Only</strong></td>
+       <td style="padding: 10px; color: var(--accent-pink);">Causal Masked (Past context only)</td>
+       <td style="padding: 10px;">GPT-4, Claude, Llama 3</td>
+       <td style="padding: 10px; color: var(--accent-teal);">Autoregressive generation & reasoning</td>
+       <td style="padding: 10px;">Generative chat, code generation, creative writing, agent reasoning</td>
+      </tr>
+      <tr style="border-bottom: 1px solid var(--border-color);">
+       <td style="padding: 10px;"><strong>Encoder-Decoder</strong></td>
+       <td style="padding: 10px;">Cross-Attention (Full input + Causal output)</td>
+       <td style="padding: 10px;">T5, BART, Whisper</td>
+       <td style="padding: 10px;">Sequence-to-Sequence transformation</td>
+       <td style="padding: 10px;">Language translation, document summarization, speech-to-text</td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+
+  <section>
+   <h2>5. Check Your Understanding 🧠</h2>
+   <div class="interactive-card">
+    
+    <div class="quiz-question">
+     Why do we divide the dot-product similarity matrix $Q K^T$ by $\sqrt{d_k}$ in the scaled dot-product attention formula?
+    </div>
+    <div class="quiz-options">
+     <button class="quiz-option" onclick="checkQuiz(this, true, 'Spot on! Large key dimensions d_k cause dot products to grow large, pushing Softmax into regions with extremely small gradients.')">
+      A) To prevent large dot products from causing vanishing gradients inside the Softmax activation.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Scaling prevents numerical instability.')">
+      B) To force all output attention scores to equal 0.
+     </button>
+     <button class="quiz-option" onclick="checkQuiz(this, false, 'Incorrect. Transformers handle text in parallel.')">
+      C) To convert text tokens into 2D image convolutions.
+     </button>
+    </div>
+    <div id="quiz-feedback" class="quiz-feedback"></div>
+   </div>
+  </section>
+
+  <div class="module-nav">
+   <a href="../lessons/0017-rnn-lstm-sequences.html">&larr; Lesson 0017: Sequential Models & LSTMs</a>
+   <a href="../lessons/0019-generative-ai-gans-diffusion.html">Next Lesson 0019: Generative AI &rarr;</a>
+  </div>
+ </main>
+
+ <footer>
+  <p>Machine Learning Zero to Hero • Lesson 0018</p>
+ </footer>
+
+  <script>
+  const canvas2d = document.getElementById('attn-2d');
+  const ctx2d = canvas2d.getContext('2d');
+
+  let activeWord = 'its';
+  const tokens = ['The', 'robot', 'recharged', 'its', 'battery'];
+  const attnWeights = {
+   'The': [0.65, 0.20, 0.05, 0.05, 0.05],
+   'robot': [0.10, 0.65, 0.10, 0.10, 0.05],
+   'recharged': [0.05, 0.25, 0.50, 0.10, 0.10],
+   'its': [0.03, 0.85, 0.05, 0.05, 0.02], // 'its' strongly resolves to 'robot'!
+   'battery': [0.02, 0.10, 0.28, 0.05, 0.55]
+  };
+
+  function renderAttn() {
+   ctx2d.clearRect(0, 0, canvas2d.width, canvas2d.height);
+   ctx2d.fillStyle = '#ffffff';
+   ctx2d.fillRect(0, 0, canvas2d.width, canvas2d.height);
+
+   const activeIdx = tokens.indexOf(activeWord);
+   const weights = attnWeights[activeWord] || [0.2, 0.2, 0.2, 0.2, 0.2];
+
+   // --- LEFT SIDE: TOKEN ATTENTION BEAMS ---
+   const tokenY = 220;
+   const tokenCoords = tokens.map((_, i) => 40 + i * 65);
+
+   // Draw Curved Attention Beams from active Query token to all Key tokens
+   tokens.forEach((_, keyIdx) => {
+    const qX = tokenCoords[activeIdx];
+    const kX = tokenCoords[keyIdx];
+    const w = weights[keyIdx];
+
+    if (w > 0.04) {
+     const cpY = tokenY - Math.abs(qX - kX) * 0.85 - 20;
+     ctx2d.beginPath();
+     ctx2d.moveTo(qX, tokenY - 18);
+     ctx2d.quadraticCurveTo((qX + kX) / 2, cpY, kX, tokenY - 18);
+     ctx2d.strokeStyle = keyIdx === activeIdx ? '#cbd5e1' : `rgba(79, 70, 229, ${Math.min(1.0, w * 1.3)})`;
+     ctx2d.lineWidth = Math.max(1, w * 9);
+     ctx2d.stroke();
+    }
+   });
+
+   // Draw Token Nodes
+   tokens.forEach((t, idx) => {
+    const px = tokenCoords[idx];
+    const isQuery = idx === activeIdx;
+
+    ctx2d.beginPath();
+    ctx2d.arc(px, tokenY, 14, 0, Math.PI * 2);
+    ctx2d.fillStyle = isQuery ? '#4f46e5' : '#f1f5f9';
+    ctx2d.fill();
+    ctx2d.strokeStyle = isQuery ? '#3730a3' : '#cbd5e1';
+    ctx2d.lineWidth = isQuery ? 3 : 1.5;
+    ctx2d.stroke();
+
+    ctx2d.fillStyle = isQuery ? '#ffffff' : '#334155';
+    ctx2d.font = 'bold 11px Inter, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.textBaseline = 'middle';
+    ctx2d.fillText(t, px, tokenY);
+
+    // Percentage score badge above node
+    const scorePct = Math.round(weights[idx] * 100);
+    ctx2d.fillStyle = isQuery ? '#4f46e5' : '#64748b';
+    ctx2d.font = '10px Inter, sans-serif';
+    ctx2d.fillText(`${scorePct}%`, px, tokenY + 24);
+   });
+
+   // --- RIGHT SIDE: 5x5 SOFTMAX ATTENTION MATRIX ---
+   const matX = 370, matY = 70;
+   const cellSize = 38;
+
+   ctx2d.textAlign = 'left';
+   ctx2d.textBaseline = 'alphabetic';
+   ctx2d.fillStyle = '#0f172a';
+   ctx2d.font = 'bold 12px Inter, sans-serif';
+   ctx2d.fillText('Softmax Attention Matrix A = Softmax(QK^T / √d_k)', matX - 10, matY - 20);
+
+   tokens.forEach((qTok, r) => {
+    const isRowActive = (qTok === activeWord);
+
+    // Row Label
+    ctx2d.fillStyle = isRowActive ? '#4f46e5' : '#64748b';
+    ctx2d.font = isRowActive ? 'bold 11px Inter, sans-serif' : '10px Inter, sans-serif';
+    ctx2d.textAlign = 'right';
+    ctx2d.fillText(qTok, matX - 8, matY + r * cellSize + 22);
+
+    const rWeights = attnWeights[qTok];
+    tokens.forEach((_, c) => {
+     const w = rWeights[c];
+     const px = matX + c * cellSize;
+     const py = matY + r * cellSize;
+
+     ctx2d.fillStyle = `rgba(79, 70, 229, ${w * 1.1})`;
+     ctx2d.fillRect(px, py, cellSize - 2, cellSize - 2);
+
+     ctx2d.strokeStyle = isRowActive ? '#4f46e5' : '#e2e8f0';
+     ctx2d.lineWidth = isRowActive ? 2 : 1;
+     ctx2d.strokeRect(px, py, cellSize - 2, cellSize - 2);
+
+     // Value
+     ctx2d.fillStyle = w > 0.4 ? '#ffffff' : '#334155';
+     ctx2d.font = '9px Inter, sans-serif';
+     ctx2d.textAlign = 'center';
+     ctx2d.fillText(Math.round(w * 100) + '%', px + cellSize/2 - 1, py + cellSize/2 + 3);
+    });
+   });
+
+   requestAnimationFrame(renderAttn);
+  }
+
+  function focusWord(word) {
+   activeWord = word;
+   const targetIdx = attnWeights[word].indexOf(Math.max(...attnWeights[word]));
+   const targetWord = tokens[targetIdx];
+   document.getElementById('attn-status').innerText = `Query Token "${word}" -> Highest Attention (${Math.round(attnWeights[word][targetIdx]*100)}%) focused on Key Token "${targetWord}"!`;
+  }
+
+  renderAttn();
+
+  function checkQuiz(btn, isCorrect, feedbackText) {
+   const options = btn.parentElement.querySelectorAll('.quiz-option');
+   options.forEach(opt => opt.classList.remove('correct', 'incorrect'));
+   const feedbackEl = document.getElementById('quiz-feedback');
+   if (isCorrect) {
+    btn.classList.add('correct');
+    feedbackEl.style.color = 'var(--success-border)';
+    feedbackEl.innerHTML = '✓ ' + feedbackText;
+   } else {
+    btn.classList.add('incorrect');
+    feedbackEl.style.color = 'var(--alert-border)';
+    feedbackEl.innerHTML = '✗ ' + feedbackText;
+   }
+  }
+ </script>
+</body>
+</html>
